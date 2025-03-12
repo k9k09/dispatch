@@ -15,6 +15,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 
 def home(request):
+    print("Home view accessed")
     return render(request, 'index.html')
 
 def signup(request):

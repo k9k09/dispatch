@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'dispatch.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  #
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,8 +81,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'motorcycle',  # Your MySQL database name
-        'USER': 'Pius',      # Your MySQL username
-        'PASSWORD': 'Pius3343',  # Your MySQL password
+        'USER': 'Patel',      # Your MySQL username
+        'PASSWORD': '@FamilyX7',  # Your MySQL password
         'HOST': 'localhost',    # Use '127.0.0.1' if localhost does not work
         'PORT': '3306',         # Default MySQL port
         'OPTIONS': {
@@ -126,10 +127,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Static files settings
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "system/static",
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'system/static')]  # Where static files are initially stored
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')   # Destination for collected static files
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -146,3 +150,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+
+# Other settings...

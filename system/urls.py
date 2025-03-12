@@ -1,12 +1,14 @@
+# system/urls.py
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Auth views
+    # Home view
     path('', views.home, name='home'),
+    
+    # Auth views
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
     
     # Ride request views
     path('create-ride/', views.create_ride_request, name='create_ride_request'),
