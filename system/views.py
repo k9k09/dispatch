@@ -4,13 +4,54 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Motorcycle
+from .models import Motorcycle, Profile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from .models import Profile, Motorcycle, RideRequest, Payment, Rating
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login, logout
 from django.utils.timezone import now
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib import messages
+
+def home(request):
+    return render(request, 'index.html')
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Create profile
+            Profile.objects.create(
+                user=user,
+                phone=request.POST.get('phone', ''),
+                user_type='client'  # Default to client, adjust as needed
+            )
+            login(request, user)
+            messages.success(request, 'Account created successfully!')
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, 'Logged in successfully!')
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'Logged out successfully!')
+    return redirect('home')
+
 
 @csrf_exempt
 def update_driver_location(request):

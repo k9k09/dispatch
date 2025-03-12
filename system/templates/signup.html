@@ -1,32 +1,32 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login - MotoGo{% endblock %}
+{% block title %}Sign Up - MotoGo{% endblock %}
 
 {% block content %}
 <main>
     <div class="auth-hero">
         <div class="auth-hero-content">
-            <h1>Welcome Back</h1>
-            <p>Log in to your MotoGo account to manage your deliveries</p>
+            <h1>Join MotoGo Today</h1>
+            <p>Create an account and experience lightning-fast deliveries</p>
         </div>
     </div>
 
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-card-header">
-                <h2 class="auth-title">Log In</h2>
-                <p class="auth-subtitle">Enter your credentials below</p>
+                <h2 class="auth-title">Create Account</h2>
+                <p class="auth-subtitle">Fill in your details below</p>
             </div>
             
             <form method="post" class="auth-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="button button-full">Log In</button>
+                <button type="submit" class="button button-full">Create Account</button>
             </form>
             
             <p class="auth-footer">
-                Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
+                Already have an account? <a href="{% url 'login' %}">Log in</a>
             </p>
         </div>
     </div>

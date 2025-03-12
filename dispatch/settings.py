@@ -126,21 +126,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-# STATIC_URL = '/static/'
-# Static files settings
 STATIC_URL = '/static/'
-
-# Set the location of static files
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # Assuming your static files are in a "static" directory in your project folder
+    BASE_DIR / "system/static",
 ]
-
-# Whitenoise for static file management
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# This will tell Django to serve static files correctly when running in production
-# If running locally, use these settings to serve static files:
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -149,3 +138,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 ASGI_APPLICATION = "dispatch.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
