@@ -1,29 +1,11 @@
-"""
-URL configuration for dispatch project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-# dispatch/urls.py
 from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path
+from system.views import home, login_view, signup, logout_view  # Importing logout view
 
-urlpatterns = [
+urlpatterns = [  
+    path('', home, name='home'),  # Adding home URL pattern
     path('admin/', admin.site.urls),
-    path('', include('system.urls')),
+    path('login/', login_view, name='login'),
+    path('signup/', signup, name='signup'),  # Correctly linking to the signup view
+    path('logout/', logout_view, name='logout'),  # Linking to the logout view
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
