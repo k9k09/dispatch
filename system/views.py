@@ -11,7 +11,8 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 
 def home(request):
-    motorcycles = Motorcycle.objects.filter(availability=True)
+    motorcycles = Motorcycle.objects.all()  # Removed filter for availability
+
     return render(request, 'index.html', {'motorcycles': motorcycles})
 
 # User Authentication Views
@@ -20,9 +21,12 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            Profile.objects.create(
+            phone = request.POST.get('phone', '').strip()  # Get phone and strip whitespace
+            if phone:  # Only create profile if phone is provided
+                Profile.objects.create(
+
                 user=user,
-                phone=request.POST.get('phone', ''),
+                phone=phone,
                 user_type='client'  # Default to client
             )
             login(request, user)
@@ -155,14 +159,20 @@ def add_rating(request, ride_id):
 # User Dashboard
 @login_required
 def dashboard(request):
-    context = {
-        'total_rides': RideRequest.objects.filter(client=request.user.profile).count(),
+    try:
+        profile = request.user.profile  # Attempt to access the user's profile
+        context = {
+            'total_rides': RideRequest.objects.filter(client=profile).count(),
+
         'total_distance': 487,
         'total_spent': 345,
         'recent_bookings': RideRequest.objects.filter(client=request.user.profile).order_by('-created_at')[:5],
         'nearby_bikes': Motorcycle.objects.filter(availability=True).order_by('distance')[:5]
     }
-    return render(request, 'dashboard.html', context)
+        return render(request, 'dashboard.html', context)
+    except Profile.DoesNotExist:
+        return redirect('signup')  # Redirect to signup if the profile does not exist
+
 
 # Book a Bike (Client)
 @login_required

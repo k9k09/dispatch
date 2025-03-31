@@ -11,9 +11,9 @@ class ProfileAdmin(admin.ModelAdmin):
 # Motorcycle Admin
 @admin.register(Motorcycle)
 class MotorcycleAdmin(admin.ModelAdmin):
-    list_display = ('plate_number', 'driver', 'model', 'color', 'availability')
+    list_display = ('plate_number', 'driver')  # Removed 'color' and 'availability'
     search_fields = ('plate_number', 'driver__user__username')
-    list_filter = ('availability',)
+    list_filter = ()  # Removed 'availability'
 
 # RideRequest Admin
 @admin.register(RideRequest)
