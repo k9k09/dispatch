@@ -1,0 +1,19 @@
+<script>
+    function updateLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                fetch('/update-location/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        driver_id: 1,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    })
+                });
+            });
+        }
+    }
+    setInterval(updateLocation, 5000); // Update every 5 seconds
+    </script>
+    

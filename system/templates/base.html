@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MotoGo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% block nav %}
+    <nav>
+      <div class="nav-container">
+        <a href="{% url 'home' %}" class="logo">MotoGo</a>
+        <div class="nav-links">
+            <a href="{% url 'home' %}#features" class="nav-link">Features</a>
+            <a href="{% url 'home' %}#how-it-works" class="nav-link">How It Works</a>
+            <a href="{% url 'home' %}#pricing" class="nav-link">Pricing</a>
+            <div class="dropdown">
+                <button class="button dropdown-toggle">Get Started</button>
+                <div class="dropdown-menu">
+                    <a href="{% url 'login' %}" class="dropdown-item">Log In</a>
+                    <a href="{% url 'signup' %}" class="dropdown-item">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    {% block content %}
+    {% endblock %}
+
+    {% block footer %}
+    <footer>
+        <div class="footer-grid">
+          <div class="footer-links">
+            <h3 class="logo">MotoGo</h3>
+            <p>Fast, reliable motorcycle dispatch services available 24/7.</p>
+          </div>
+          <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Services</a></li>
+              <li><a href="#">Pricing</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-links">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Cookie Policy</a></li>
+            </ul>
+          </div>
+          <div class="footer-links">
+            <h4>Connect</h4>
+            <ul>
+              <li><a href="#">Twitter</a></li>
+              <li><a href="#">Facebook</a></li>
+              <li><a href="#">Instagram</a></li>
+              <li><a href="#">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 MotoGo. All rights reserved.</p>
+        </div>
+      </footer>
+    {% endblock %}
+
+    <script type="module" src="{% static 'main.js' %}"></script>
+</body>
+</html>
