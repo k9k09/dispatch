@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db import models
 
 def home(request):
     motorcycles = Motorcycle.objects.all()  # Removed filter for availability
@@ -24,7 +25,6 @@ def signup(request):
             phone = request.POST.get('phone', '').strip()  # Get phone and strip whitespace
             if phone:  # Only create profile if phone is provided
                 Profile.objects.create(
-
                 user=user,
                 phone=phone,
                 user_type='client'  # Default to client
@@ -161,18 +161,50 @@ def add_rating(request, ride_id):
 def dashboard(request):
     try:
         profile = request.user.profile  # Attempt to access the user's profile
+        
+        # Get recent bookings by this user
+        recent_bookings = RideRequest.objects.filter(client=profile).order_by('-created_at')[:5]
+        
+        # Get available motorcycles sorted by distance
+        nearby_bikes = Motorcycle.objects.filter(availability=True).order_by('distance')[:5]
+        
+        # Calculate total spent from payments
+        total_spent = Payment.objects.filter(ride__client=profile).aggregate(
+            total=models.Sum('amount')
+        )['total'] or 0
+        
+        # Get completed rides
+        completed_rides = RideRequest.objects.filter(
+            client=profile, 
+            status='completed'
+        )
+        
+        # Count total completed rides
+        total_rides = completed_rides.count()
+        
+        # Calculate total distance from completed rides
+        total_distance = completed_rides.aggregate(
+            total=models.Sum('distance_km')
+        )['total'] or 0
+        
         context = {
-            'total_rides': RideRequest.objects.filter(client=profile).count(),
-
-        'total_distance': 487,
-        'total_spent': 345,
-        'recent_bookings': RideRequest.objects.filter(client=request.user.profile).order_by('-created_at')[:5],
-        'nearby_bikes': Motorcycle.objects.filter(availability=True).order_by('distance')[:5]
-    }
+            'total_rides': total_rides,
+            'total_distance': total_distance,
+            'total_spent': total_spent,
+            'recent_bookings': recent_bookings,
+            'nearby_bikes': nearby_bikes,
+            'profile': profile,
+        }
         return render(request, 'dashboard.html', context)
     except Profile.DoesNotExist:
-        return redirect('signup')  # Redirect to signup if the profile does not exist
-
+        # Create a profile for the user if one doesn't exist
+        profile = Profile.objects.create(
+            user=request.user,
+            phone="Please update",  # Placeholder
+            user_type='client'  # Default to client
+        )
+        messages.success(request, "Your profile has been created. Please update your phone number.")
+        return redirect('dashboard')  # Redirect back to dashboard with the new profile
 
 # Book a Bike (Client)
 @login_required

@@ -28,7 +28,9 @@ class Motorcycle(models.Model):
     )
     plate_number = models.CharField(max_length=20, unique=True)
     latitude = models.FloatField(default=0.0)  # GPS Latitude
-    longitude = models.FloatField(default=0.0) # GPS Longitude
+    longitude = models.FloatField(default=0.0)  # GPS Longitude
+    availability = models.BooleanField(default=True)  # Indicates if the motorcycle is available
+    distance = models.FloatField(default=0.0)  # Distance from a reference point (can be updated dynamically)
 
     def __str__(self):
         return f"{self.plate_number} - {self.driver.user.username}"
@@ -68,6 +70,7 @@ class RideRequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     fare = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
+    distance_km = models.FloatField(default=0.0)  # Distance in kilometers
 
     def __str__(self):
         return f"Ride {self.id} - {self.client.user.username} ({self.status})"
