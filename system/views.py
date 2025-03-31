@@ -26,13 +26,13 @@ def signup(request):
                 phone=request.POST.get('phone', ''),
                 user_type='client'  # Default to client
             )
-            login(request, user)
+            login(request,
+                  user)
             messages.success(request, 'Account created successfully!')
             return redirect('home')
     else:
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form})
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -45,7 +45,6 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
-
 
 def logout_view(request):
     logout(request)
@@ -104,12 +103,10 @@ def ride_detail(request, ride_id):
     ride_request = get_object_or_404(RideRequest, id=ride_id)
     return render(request, 'ride_detail.html', {'ride_request': ride_request})
 
-
 # Accept Ride Request (Driver)
 @login_required
 def accept_ride_request(request, ride_id):
     ride_request = get_object_or_404(RideRequest, id=ride_id)
-
     if ride_request.status == 'pending' and ride_request.driver is None:
         ride_request.driver = request.user.profile
         ride_request.status = 'accepted'
