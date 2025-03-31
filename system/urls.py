@@ -5,7 +5,6 @@ from . import views
 urlpatterns = [
     # Home view
     path('', views.home, name='home'),
-<<<<<<< HEAD
     # Auth views
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
@@ -13,12 +12,6 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('book-bike/<int:bike_id>/', views.book_bike, name='book_bike'),
 
-=======
-    
-    # Auth views
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.login_view, name='login'),
->>>>>>> 73996143e879bd0767fa4a27f5f30ace68a4573f
     
     # Ride request views
     path('create-ride/', views.create_ride_request, name='create_ride_request'),

@@ -14,7 +14,6 @@ def home(request):
     motorcycles = Motorcycle.objects.filter(availability=True)
     return render(request, 'index.html', {'motorcycles': motorcycles})
 
-
 # User Authentication Views
 def signup(request):
     if request.method == 'POST':
@@ -26,8 +25,7 @@ def signup(request):
                 phone=request.POST.get('phone', ''),
                 user_type='client'  # Default to client
             )
-            login(request,
-                  user)
+            login(request, user)
             messages.success(request, 'Account created successfully!')
             return redirect('home')
     else:
@@ -50,7 +48,6 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Logged out successfully!')
     return redirect('home')
-
 
 # Driver Location Update (GPS Tracking)
 @csrf_exempt
@@ -78,7 +75,6 @@ def update_driver_location(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-
 # Create Ride Request (Client)
 @login_required
 def create_ride_request(request):
@@ -95,7 +91,6 @@ def create_ride_request(request):
         )
         return redirect('ride_detail', ride_id=ride_request.id)
     return render(request, 'create_ride_request.html')
-
 
 # View Ride Request details
 @login_required
@@ -115,7 +110,6 @@ def accept_ride_request(request, ride_id):
 
     return JsonResponse({'error': 'Ride request already accepted or unavailable'}, status=400)
 
-
 # Complete Ride Request (Driver)
 @login_required
 def complete_ride(request, ride_id):
@@ -134,7 +128,6 @@ def complete_ride(request, ride_id):
         return redirect('ride_detail', ride_id=ride_request.id)
 
     return JsonResponse({'error': 'Ride cannot be completed'}, status=400)
-
 
 # Add Rating for Ride
 @login_required
@@ -159,19 +152,17 @@ def add_rating(request, ride_id):
 
     return render(request, 'add_rating.html', {'ride_request': ride_request})
 
-
 # User Dashboard
 @login_required
 def dashboard(request):
     context = {
-        'total_rides': 24,  # Replace with actual data from your models
+        'total_rides': RideRequest.objects.filter(client=request.user.profile).count(),
         'total_distance': 487,
         'total_spent': 345,
-        'recent_bookings': [],
-        'nearby_bikes': []
+        'recent_bookings': RideRequest.objects.filter(client=request.user.profile).order_by('-created_at')[:5],
+        'nearby_bikes': Motorcycle.objects.filter(availability=True).order_by('distance')[:5]
     }
     return render(request, 'dashboard.html', context)
-
 
 # Book a Bike (Client)
 @login_required
