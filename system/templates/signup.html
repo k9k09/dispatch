@@ -1,34 +1,313 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Sign Up - MotoGo{% endblock %}
-
-{% block content %}
-<main class="auth-wrapper">
-    <section class="auth-hero">
-        <div class="auth-hero-content">
-            <h1>Join MotoGo Today</h1>
-            <p>Sign up now and enjoy seamless, fast deliveries.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MotoGo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4F46E5",
+                        primaryHover: "#4338CA",
+                        secondary: "#F3F4F6"
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .form-input {
+                @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200;
+            }
+            .button-primary {
+                @apply w-full bg-primary text-white py-3 rounded-lg hover:bg-primaryHover transition duration-300 font-medium flex items-center justify-center;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="container max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Logo Section -->
+        <div class="bg-primary py-6 px-6 text-center">
+            <div class="text-white text-2xl font-bold">MotoGo</div>
         </div>
-    </section>
-
-    <section class="auth-container">
-        <div class="auth-card">
-            <header class="auth-card-header">
-                <h2 class="auth-title">Create Account</h2>
-                <p class="auth-subtitle">Fill in your details below</p>
-            </header>
+        
+        <!-- Welcome Section -->
+        <div class="welcome-section px-6 pt-6 pb-3 text-center">
+            <h1 class="text-2xl font-bold text-gray-800">Join MotoGo Today</h1>
+            <p class="text-gray-600 mt-1">Sign up now and enjoy seamless, fast deliveries</p>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="signup-form-container px-6 pb-8">
+            <div class="form-header mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Create Account</h2>
+                <p class="text-sm text-gray-500">Fill in your details below</p>
+            </div>
             
-            <form method="post" class="auth-form">
+            <form method="post" class="signup-form space-y-4">
                 {% csrf_token %}
-                <div class="form-group">{{ form.as_p }}</div>
-                <button type="submit" class="button button-primary">Sign Up</button>
+                
+                <!-- Custom styling for Django form -->
+                <div class="form-fields">
+                    <style>
+                        /* Override Django's default form styling */
+                        .signup-form p {
+                            margin-bottom: 1rem;
+                        }
+                        .signup-form label {
+                            display: block;
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            color: #4B5563;
+                            margin-bottom: 0.5rem;
+                        }
+                        .signup-form input {
+                            width: 100%;
+                            padding: 0.75rem 1rem;
+                            border: 1px solid #E5E7EB;
+                            border-radius: 0.5rem;
+                            background-color: #F9FAFB;
+                            transition: all 0.2s;
+                        }
+                        .signup-form input:focus {
+                            outline: none;
+                            border-color: #4F46E5;
+                            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+                        }
+                        .signup-form .helptext {
+                            font-size: 0.75rem;
+                            color: #6B7280;
+                            margin-top: 0.25rem;
+                            display: none; /* Hide help text by default */
+                        }
+                        .signup-form ul.errorlist {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0.25rem 0 0;
+                            color: #DC2626;
+                            font-size: 0.75rem;
+                            display: none; /* Hide error messages by default */
+                        }
+                        
+                        /* Custom password validation styling */
+                        .password-validation {
+                            margin-top: 0.5rem;
+                            padding: 0.5rem;
+                            border-radius: 0.25rem;
+                            background-color: #F9FAFB;
+                            border: 1px solid #E5E7EB;
+                        }
+                        
+                        .validation-list {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+                        }
+                        
+                        .validation-item {
+                            margin-bottom: 0.25rem;
+                            display: flex;
+                            align-items: center;
+                        }
+                        
+                        .validation-item span {
+                            display: inline-block;
+                            width: 20px;
+                            text-align: center;
+                            margin-right: 0.25rem;
+                        }
+                    </style>
+                    {{ form.as_p }}
+                </div>
+                
+                <button type="submit" class="button-primary mt-6 group">
+                    <span>Sign Up</span>
+                    <i class="fas fa-user-plus ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </button>
             </form>
             
-            <footer class="auth-footer">
-                <p>Already have an account? <a href="{% url 'login' %}" class="auth-link">Log in</a></p>
-            </footer>
+            <!-- Footer -->
+            <div class="form-footer mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Already have an account? 
+                    <a href="{% url 'login' %}" class="text-primary font-medium hover:underline">Log in</a>
+                </p>
+            </div>
         </div>
-    </section>
-</main>
-{% endblock %}
+    </div>
+
+    <script>
+        // Add animation when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            container.classList.add('opacity-0');
+            setTimeout(() => {
+                container.classList.remove('opacity-0');
+                container.classList.add('opacity-100', 'transition-opacity', 'duration-500');
+            }, 100);
+            
+            // Focus on the first input field (usually username)
+            const firstInput = document.querySelector('form input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+            
+            // Check if there are any error messages on page load (happens after form submission)
+            // This ensures errors are visible if form was submitted with validation errors
+            const errorLists = document.querySelectorAll('.errorlist');
+            if (errorLists.length > 0) {
+                // Form was submitted with errors, show error messages
+                errorLists.forEach(errorList => {
+                    errorList.style.display = 'block';
+                });
+                
+                // Check for password fields with errors
+                document.querySelectorAll('input[type="password"]').forEach(passwordField => {
+                    const passwordFieldParent = passwordField.parentNode;
+                    const passwordFieldErrors = passwordFieldParent.querySelector('.errorlist');
+                    
+                    // If this password field has errors, initialize and show our custom validation
+                    if (passwordFieldErrors && passwordField.value) {
+                        // Initialize validation if it hasn't been done yet
+                        // (this happens on first page load after a form with errors)
+                        const validationContainer = passwordFieldParent.querySelector('.password-validation');
+                        if (validationContainer) {
+                            validationContainer.style.display = 'block';
+                        }
+                        
+                        // Manually trigger input event to update validation status
+                        const inputEvent = new Event('input', { bubbles: true });
+                        passwordField.dispatchEvent(inputEvent);
+                    }
+                });
+            }
+            
+            // Custom validation for password fields
+            const passwordFields = document.querySelectorAll('input[type="password"]');
+            passwordFields.forEach(passwordField => {
+                // Find the help text element that follows the password field
+                const helpTextContainer = passwordField.nextElementSibling;
+                
+                if (helpTextContainer && helpTextContainer.classList.contains('helptext')) {
+                    // Create validation message elements if they don't exist
+                    const validationContainer = document.createElement('div');
+                    validationContainer.className = 'password-validation';
+                    validationContainer.style.display = 'none';
+                    validationContainer.innerHTML = `
+                        <ul class="validation-list text-xs mt-2">
+                            <li class="validation-item" data-rule="length">
+                                <span class="text-red-500">✗</span> Must contain at least 8 characters
+                            </li>
+                            <li class="validation-item" data-rule="common">
+                                <span class="text-red-500">✗</span> Can't be a commonly used password
+                            </li>
+                            <li class="validation-item" data-rule="numeric">
+                                <span class="text-red-500">✗</span> Can't be entirely numeric
+                            </li>
+                            <li class="validation-item" data-rule="personal">
+                                <span class="text-red-500">✗</span> Can't be too similar to personal information
+                            </li>
+                        </ul>
+                    `;
+                    
+                    // Insert validation container after password field
+                    passwordField.parentNode.insertBefore(validationContainer, helpTextContainer.nextSibling);
+                    
+                    // Hide original help text as we'll use our custom one
+                    helpTextContainer.style.display = 'none';
+                    
+                    // Function to validate password
+                    const validatePassword = (password) => {
+                        // Only show validation if field has content
+                        if (password.length === 0) {
+                            validationContainer.style.display = 'none';
+                            return;
+                        }
+                        
+                        // Show validation messages
+                        validationContainer.style.display = 'block';
+                        
+                        // Check length requirement
+                        const lengthRule = validationContainer.querySelector('[data-rule="length"]');
+                        if (password.length >= 8) {
+                            lengthRule.innerHTML = '<span class="text-green-500">✓</span> Must contain at least 8 characters';
+                        } else {
+                            lengthRule.innerHTML = '<span class="text-red-500">✗</span> Must contain at least 8 characters';
+                        }
+                        
+                        // Check for numeric-only password
+                        const numericRule = validationContainer.querySelector('[data-rule="numeric"]');
+                        if (!/^\d+$/.test(password)) {
+                            numericRule.innerHTML = '<span class="text-green-500">✓</span> Can\'t be entirely numeric';
+                        } else {
+                            numericRule.innerHTML = '<span class="text-red-500">✗</span> Can\'t be entirely numeric';
+                        }
+                        
+                        // These are harder to check in JS, we'll rely on server validation
+                        // but we can provide visual feedback as the user types
+                        const commonRule = validationContainer.querySelector('[data-rule="common"]');
+                        const personalRule = validationContainer.querySelector('[data-rule="personal"]');
+                        
+                        // Simple heuristic: mark as potentially OK if password is complex enough
+                        const isComplex = password.length >= 10 && 
+                                         /[A-Z]/.test(password) && 
+                                         /[a-z]/.test(password) && 
+                                         /[0-9]/.test(password);
+                        
+                        if (isComplex) {
+                            commonRule.innerHTML = '<span class="text-green-500">✓</span> Can\'t be a commonly used password';
+                            personalRule.innerHTML = '<span class="text-green-500">✓</span> Can\'t be too similar to personal information';
+                        }
+                    };
+                    
+                    // Add input event listener to validate in real time
+                    passwordField.addEventListener('input', function() {
+                        validatePassword(this.value);
+                    });
+                    
+                    // Add focus event listener
+                    passwordField.addEventListener('focus', function() {
+                        if (this.value.length > 0) {
+                            validatePassword(this.value);
+                        }
+                    });
+                    
+                    // Add blur event listener
+                    passwordField.addEventListener('blur', function() {
+                        // Hide validation when field loses focus and empty
+                        if (this.value.length === 0) {
+                            validationContainer.style.display = 'none';
+                        }
+                    });
+                }
+            });
+            
+            // Handle form submission to show validation messages when form is submitted
+            const form = document.querySelector('.signup-form');
+            form.addEventListener('submit', function(e) {
+                // Show all error messages on submission attempt
+                document.querySelectorAll('.errorlist').forEach(errorList => {
+                    errorList.style.display = 'block';
+                });
+                
+                // Show all custom password validation messages if there are any password fields with content
+                const passwordFields = document.querySelectorAll('input[type="password"]');
+                passwordFields.forEach(passwordField => {
+                    if (passwordField.value) {
+                        const validationContainer = passwordField.parentNode.querySelector('.password-validation');
+                        if (validationContainer) {
+                            validationContainer.style.display = 'block';
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

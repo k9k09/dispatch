@@ -248,3 +248,44 @@ def client_profile(request):
         'profile': profile,
     }
     return render(request, 'Profile.html', context)
+
+from .models import Trip
+@login_required
+def my_trips(request):
+    # Fetch trips for the logged-in user
+    trips = Trip.objects.filter(user=request.user)
+    
+    context = {
+        'trips': trips,
+    }
+    return render(request, 'my_trips.html', context)
+
+@login_required
+def request_ride(request):
+    if request.method == 'POST':
+        # Extract form data
+        from_location = request.POST.get('from_location')
+        to_location = request.POST.get('to_location')
+        ride_type = request.POST.get('ride_type', 'Standard')
+        date = request.POST.get('date', timezone.now().date())  # Default to today if not provided
+        time = request.POST.get('time', timezone.now().time())  # Default to now if not provided
+        price = request.POST.get('price', 250)  # Default price, adjust based on ride_type in real app
+
+        # Create a new Trip instance
+        trip = Trip(
+            user=request.user,
+            from_location=from_location,
+            to_location=to_location,
+            date=date,
+            time=time,
+            price=price,
+            ride_type=ride_type,
+            status='Pending'
+        )
+        trip.save()
+
+        # Redirect to My Trips page after successful submission
+        return redirect('my_trips')
+
+    # For GET request, render the form
+    return render(request, 'request_ride.html')

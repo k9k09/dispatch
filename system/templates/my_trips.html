@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}My Trips - MotoGo{% endblock %}
+
+{% block page_title %}My Trips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">My Trips</h1>
+            <p class="text-gray-600">View your past and upcoming trips</p>
+        </div>
+        <div class="flex space-x-3">
+            <input type="text" placeholder="Search trips..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                <i data-lucide="filter" class="w-5 h-5 mr-2"></i>
+                Filter
+            </button>
+        </div>
+    </div>
+
+    <!-- Trips List -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-4 md:p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Your Trips</h2>
+            <a href="{% url 'request_ride' %}" class="text-blue-600 text-sm hover:text-blue-800 flex items-center">
+                Request New Ride
+                <i data-lucide="plus" class="w-4 h-4 ml-1"></i>
+            </a>
+        </div>
+        <div class="divide-y">
+            {% for trip in trips %}
+            <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-gray-100">
+                        <i data-lucide="bike" class="w-5 h-5 text-gray-700"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">{{ trip.from_location }} to {{ trip.to_location }}</h3>
+                        <p class="text-sm text-gray-500">{{ trip.date|date:"D, M d" }} • {{ trip.time|time:"H:i" }} • {{ trip.ride_type }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="font-bold">Ksh{{ trip.price }}</span>
+                    <span class="px-3 py-1 rounded-full text-xs mt-1 
+                        {% if trip.status == 'Completed' %}bg-green-100 text-green-800
+                        {% elif trip.status == 'Cancelled' %}bg-red-100 text-red-800
+                        {% elif trip.status == 'Pending' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ trip.status }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center">
+                <div class="mb-4">
+                    <i data-lucide="calendar-x" class="w-12 h-12 text-gray-300 mx-auto"></i>
+                </div>
+                <p class="text-gray-500">No trips yet</p>
+                <a href="{% url 'request_ride' %}" class="mt-2 inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                    Request your first ride
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination (optional) -->
+    {% if trips %}
+    <div class="mt-6 flex justify-center">
+        <div class="flex space-x-2">
+            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
+            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Next</button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Ensure Lucide icons are loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}
