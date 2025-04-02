@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MotoGo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+  <body>
+<nav>
+  <div class="nav-container">
+    <a href="{% url 'home' %}" class="logo">MotoGo</a>
+    <div class="nav-links">
+        <a href="{% url 'home' %}#features" class="nav-link">Features</a>
+        <a href="{% url 'home' %}#how-it-works" class="nav-link">How It Works</a>
+        <div class="dropdown">
+            <button class="button dropdown-toggle">Get Started</button>
+            <div class="dropdown-menu">
+                <a href="{% url 'login' %}" class="dropdown-item">Log In</a>
+                <a href="{% url 'signup' %}" class="dropdown-item">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <h1>Fast & Reliable Motorcycle Dispatch</h1>
+          <p>Get your packages delivered in minutes, not hours. Available 24/7.</p>
+          <div class="button-group">
+            <button class="button">Book Now</button>
+            <button class="button button-outline">Learn More</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section">
+        <h2 class="section-title">Why Choose MotoGo?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">Lightning Fast</h3>
+            <p class="feature-description">Get your packages delivered in minutes with our network of skilled riders</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3 class="feature-title">Secure & Safe</h3>
+            <p class="feature-description">Real-time tracking and insured deliveries for your peace of mind</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <h3 class="feature-title">Affordable Rates</h3>
+            <p class="feature-description">Competitive pricing with no hidden fees or surprises</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="section" style="background: #f9fafb;">
+        <h2 class="section-title">How It Works</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">1</div>
+            <h3 class="feature-title">Book a Ride</h3>
+            <p class="feature-description">Enter pickup and delivery locations in our app</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">2</div>
+            <h3 class="feature-title">Get Matched</h3>
+            <p class="feature-description">We'll connect you with the nearest available rider</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">3</div>
+            <h3 class="feature-title">Track Real-time</h3>
+            <p class="feature-description">Follow your delivery's progress live on the map</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">4</div>
+            <h3 class="feature-title">Delivery Complete</h3>
+            <p class="feature-description">Rate your experience and leave feedback</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="footer-grid">
+          <div class="footer-links">
+            <h3 class="logo">MotoGo</h3>
+            <p>Fast, reliable motorcycle dispatch services available 24/7.</p>
+          </div>
+          <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Services</a></li>
+              <li><a href="#">Pricing</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-links">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Cookie Policy</a></li>
+            </ul>
+          </div>
+          <div class="footer-links">
+            <h4>Connect</h4>
+            <ul>
+              <li><a href="#">Twitter</a></li>
+              <li><a href="#">Facebook</a></li>
+              <li><a href="#">Instagram</a></li>
+              <li><a href="#">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 MotoGo. All rights reserved.</p>
+        </div>
+      </footer>
+    </main>
+
+    <script type="module" src="{% static 'main.js' %}"></script>
+  </body>
+</html>

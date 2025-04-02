@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('book-bike/<int:bike_id>/', views.book_bike, name='book_bike'),
+    
 
     # Ride request views
     path('create-ride/', views.create_ride_request, name='create_ride_request'),
@@ -18,4 +19,5 @@ urlpatterns = [
     path('ride/<int:ride_id>/accept/', views.accept_ride_request, name='accept_ride_request'),
     path('ride/<int:ride_id>/complete/', views.complete_ride, name='complete_ride'),
     path('ride/<int:ride_id>/rate/', views.add_rating, name='add_rating'),
+    path('profile/', views.client_profile, name='client_profile'),
 ]

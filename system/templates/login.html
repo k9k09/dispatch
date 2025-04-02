@@ -1,34 +1,131 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Login - MotoGo{% endblock %}
-
-{% block content %}
-<main>
-    <div class="auth-hero">
-        <div class="auth-hero-content">
-            <h1>Welcome Back</h1>
-            <p>Log in to your MotoGo account to manage your deliveries</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MotoGo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4F46E5",
+                        primaryHover: "#4338CA",
+                        secondary: "#F3F4F6"
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .form-input {
+                @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200;
+            }
+            .button-primary {
+                @apply w-full bg-primary text-white py-3 rounded-lg hover:bg-primaryHover transition duration-300 font-medium flex items-center justify-center;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="container max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Logo Section -->
+        <div class="bg-primary py-6 px-6 text-center">
+            <div class="text-white text-2xl font-bold">MotoGo</div>
         </div>
-    </div>
-
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-card-header">
-                <h2 class="auth-title">Log In</h2>
-                <p class="auth-subtitle">Enter your credentials below</p>
+        
+        <!-- Welcome Section -->
+        <div class="welcome-section px-6 pt-6 pb-3 text-center">
+            <h1 class="text-2xl font-bold text-gray-800">Welcome Back</h1>
+            <p class="text-gray-600 mt-1">Log in to your MotoGo account to manage your deliveries</p>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="login-form-container px-6 pb-8">
+            <div class="form-header mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Log In</h2>
+                <p class="text-sm text-gray-500">Enter your credentials below</p>
             </div>
             
-            <form method="post" class="auth-form">
+            <form method="post" class="login-form space-y-4">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="button button-full">Log In</button>
+                
+                <!-- Custom styling for Django form -->
+                <div class="form-fields">
+                    <style>
+                        /* Override Django's default form styling */
+                        .login-form p {
+                            margin-bottom: 1rem;
+                        }
+                        .login-form label {
+                            display: block;
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            color: #4B5563;
+                            margin-bottom: 0.5rem;
+                        }
+                        .login-form input {
+                            width: 100%;
+                            padding: 0.75rem 1rem;
+                            border: 1px solid #E5E7EB;
+                            border-radius: 0.5rem;
+                            background-color: #F9FAFB;
+                            transition: all 0.2s;
+                        }
+                        .login-form input:focus {
+                            outline: none;
+                            border-color: #4F46E5;
+                            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+                        }
+                        .login-form .helptext {
+                            display: none;
+                        }
+                        .login-form ul.errorlist {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0.25rem 0 0;
+                            color: #DC2626;
+                            font-size: 0.75rem;
+                        }
+                    </style>
+                    {{ form.as_p }}
+                </div>
+                
+                <button type="submit" class="button-primary mt-6 group">
+                    <span>Log In</span>
+                    <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </button>
             </form>
             
-            <p class="auth-footer">
-                Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
-            </p>
+            <!-- Footer -->
+            <div class="form-footer mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Don't have an account? 
+                    <a href="{% url 'signup' %}" class="text-primary font-medium hover:underline">Sign up</a>
+                </p>
+            </div>
         </div>
     </div>
-</main>
-{% endblock %}
+
+    <script>
+        // Add animation when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            container.classList.add('opacity-0');
+            setTimeout(() => {
+                container.classList.remove('opacity-0');
+                container.classList.add('opacity-100', 'transition-opacity', 'duration-500');
+            }, 100);
+            
+            // Focus on the first input field (usually username)
+            const firstInput = document.querySelector('form input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

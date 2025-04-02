@@ -1,69 +1,277 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}MotoGo - Fast & Reliable Motorcycle Dispatch{% endblock %}
 
 {% block content %}
-<main>
-    <main>
-      <section class="hero">
-        <div class="hero-content">
-          <h1>Fast & Reliable Motorcycle Dispatch</h1>
-          <p>Get a motorcycle at your doorstep within minutes. Quick, safe, and affordable rides anywhere in the city.</p>
-          <div class="button-group">
-            <button class="button">Book a Ride</button>
-            <button class="button button-outline">Learn More</button>
-          </div>
+<!-- Main Content -->
+<div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white shadow-sm z-10">
+        <div class="flex items-center justify-between px-4 md:px-8 py-4">
+            <div class="flex items-center">
+                <button class="p-2 mr-2 md:hidden text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input
+                        type="text"
+                        placeholder="Search destinations..."
+                        class="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-full w-56 md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    >
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 relative">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                    <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+                <a href="{% url 'client_profile' %}" class="flex items-center space-x-3 border rounded-full px-3 py-1 hover:shadow-md cursor-pointer">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                        {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                    </div>
+                    <span class="font-medium hidden md:block">{{ user.get_full_name|default:user.username }}</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 hidden md:block"></i>
+                </a>
+            </div>
         </div>
-      </section>
+    </header>
 
-      <section id="features" class="section">
-        <h2 class="section-title">Why Choose MotoGo?</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3 class="feature-title">Lightning Fast</h3>
-            <p class="feature-description">Get your packages delivered in minutes with our network of skilled riders</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🛡️</div>
-            <h3 class="feature-title">Secure & Safe</h3>
-            <p class="feature-description">Real-time tracking and insured deliveries for your peace of mind</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <h3 class="feature-title">Affordable Rates</h3>
-            <p class="feature-description">Competitive pricing with no hidden fees or surprises</p>
-          </div>
+    <!-- Dashboard Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        <!-- Welcome Message -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Welcome back, {{ user.first_name|default:user.username }}</h1>
+            <p class="text-gray-600">Where would you like to go today?</p>
         </div>
-      </section>
 
-      <section id="how-it-works" class="section" style="background: #f9fafb;">
-        <h2 class="section-title">How It Works</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">1</div>
-            <h3 class="feature-title">Book a Ride</h3>
-            <p class="feature-description">Enter pickup and delivery locations in our app</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">2</div>
-            <h3 class="feature-title">Get Matched</h3>
-            <p class="feature-description">We'll connect you with the nearest available rider</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">3</div>
-            <h3 class="feature-title">Track Real-time</h3>
-            <p class="feature-description">Follow your delivery's progress live on the map</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">4</div>
-            <h3 class="feature-title">Delivery Complete</h3>
-            <p class="feature-description">Rate your experience and leave feedback</p>
-          </div>
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow border-l-4 border-blue-500">
+                <div class="p-3 rounded-full bg-blue-100 mb-2">
+                    <i data-lucide="flag" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Request Ride</span>
+            </button>
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div class="p-3 rounded-full bg-purple-100 mb-2">
+                    <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Schedule</span>
+            </button>
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div class="p-3 rounded-full bg-green-100 mb-2">
+                    <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Share Ride</span>
+            </button>
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div class="p-3 rounded-full bg-amber-100 mb-2">
+                    <i data-lucide="package" class="w-6 h-6 text-amber-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Delivery</span>
+            </button>
         </div>
-      </section>
 
-     
+        <!-- Map and Booking Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Map Section (Uber/Bolt style) -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="h-96 bg-gray-200 relative">
+                    <!-- Map placeholder - in real app, replace with actual map -->
+                    <div class="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                        <p class="text-gray-500">Interactive Map Loading...</p>
+                    </div>
+                    
+                    <!-- Quick action buttons -->
+                    <div class="absolute bottom-4 right-4 flex space-x-2">
+                        <button class="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50">
+                            <i data-lucide="locate" class="w-5 h-5 text-blue-600"></i>
+                        </button>
+                        <button class="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50">
+                            <i data-lucide="layers" class="w-5 h-5 text-gray-700"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ride booking panel -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-lg font-semibold mb-4">Request a Ride</h2>
+                <div class="flex flex-col space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex flex-col items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <div class="w-0.5 h-12 bg-gray-300"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="flex flex-col space-y-4 flex-1">
+                            <div class="relative">
+                                <input type="text" placeholder="Current location" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-blue-500">
+                                    <i data-lucide="locate" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <input type="text" placeholder="Where to?" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="font-medium text-gray-700">Ride Type</h3>
+                        <div class="flex space-x-3 overflow-x-auto pb-2">
+                            <div class="flex-none bg-blue-50 border-2 border-blue-500 rounded-lg p-3 flex flex-col items-center w-24 cursor-pointer">
+                                <i data-lucide="bike" class="w-6 h-6 text-blue-600 mb-1"></i>
+                                <span class="text-sm font-medium">Standard</span>
+                                <span class="text-xs text-gray-500">Ksh250</span>
+                            </div>
+                            <div class="flex-none bg-white border border-gray-200 rounded-lg p-3 flex flex-col items-center w-24 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                                <i data-lucide="zap" class="w-6 h-6 text-purple-600 mb-1"></i>
+                                <span class="text-sm font-medium">Express</span>
+                                <span class="text-xs text-gray-500">Ksh350</span>
+                            </div>
+                            <div class="flex-none bg-white border border-gray-200 rounded-lg p-3 flex flex-col items-center w-24 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                                <i data-lucide="users" class="w-6 h-6 text-green-600 mb-1"></i>
+                                <span class="text-sm font-medium">Share</span>
+                                <span class="text-xs text-gray-500">Ksh150</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button class="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center">
+                            <i data-lucide="clock" class="w-5 h-5 mr-2"></i>
+                            Now
+                        </button>
+                        <button class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                            Request Ride
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow overflow-hidden relative">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i data-lucide="bike" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Rides</p>
+                        <h3 class="text-xl font-bold">{{ total_rides|default:"0" }}</h3>
+                    </div>
+                </div>
+                <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-blue-100 rounded-full opacity-30"></div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow overflow-hidden relative">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i data-lucide="route" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Distance Traveled</p>
+                        <h3 class="text-xl font-bold">{{ total_distance|default:"0" }} km</h3>
+                    </div>
+                </div>
+                <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-green-100 rounded-full opacity-30"></div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow overflow-hidden relative">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-purple-100">
+                        <i data-lucide="credit-card" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Spent</p>
+                        <h3 class="text-xl font-bold">Ksh{{ total_spent|default:"0" }}</h3>
+                    </div>
+                </div>
+                <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-purple-100 rounded-full opacity-30"></div>
+            </div>
+        </div>
+
+        <!-- Recent Trips -->
+        <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+            <div class="p-4 md:p-6 border-b flex items-center justify-between">
+                <h2 class="text-lg font-semibold">Recent Trips</h2>
+                <button class="text-blue-600 text-sm hover:text-blue-800 flex items-center">
+                    View All
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </button>
+            </div>
+            <div class="divide-y">
+                {% for trip in recent_trips %}
+                <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-gray-100">
+                            <i data-lucide="bike" class="w-5 h-5 text-gray-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium">{{ trip.from_location }} to {{ trip.to_location }}</h3>
+                            <p class="text-sm text-gray-500">{{ trip.date|date:"D, M d" }} • {{ trip.time }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="font-bold">Ksh{{ trip.price }}</span>
+                        <span class="px-3 py-1 rounded-full text-xs mt-1 {% if trip.status == 'Completed' %}bg-green-100 text-green-800{% elif trip.status == 'Cancelled' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ trip.status }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center">
+                    <div class="mb-4">
+                        <i data-lucide="calendar-x" class="w-12 h-12 text-gray-300 mx-auto"></i>
+                    </div>
+                    <p class="text-gray-500">No trips yet</p>
+                    <a href="#" class="mt-2 inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Request your first ride</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Popular Destinations -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-4 md:p-6 border-b flex items-center justify-between">
+                <h2 class="text-lg font-semibold">Popular Destinations</h2>
+                <button class="text-blue-600 text-sm hover:text-blue-800 flex items-center">
+                    See All
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </button>
+            </div>
+            <div class="p-4 md:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for destination in popular_destinations %}
+                    <div class="bg-white border rounded-xl overflow-hidden hover:shadow-md transition-shadow group">
+                        <div class="relative">
+                            <img src="{{ destination.image.url }}" alt="{{ destination.name }}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                <h3 class="text-white font-medium">{{ destination.name }}</h3>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-500 mb-3">
+                                <i data-lucide="map-pin" class="w-4 h-4 inline mr-1"></i>
+                                {{ destination.address }}
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600">~{{ destination.avg_price }} Ksh</span>
+                                <a href="{% url 'request_ride' %}?destination={{ destination.id }}" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                                    Ride Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-3 p-6 text-center">
+                        <div class="mb-4">
+                            <i data-lucide="map-off" class="w-12 h-12 text-gray-300 mx-auto"></i>
+                        </div>
+                        <p class="text-gray-500">No popular destinations yet</p>
+                        <p class="text-sm text-gray-400 mt-2">Take more rides to see popular destinations</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </main>
+</div>
 {% endblock %}

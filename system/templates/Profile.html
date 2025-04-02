@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Client Profile - MotoGo{% endblock %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-3xl font-semibold text-motogo-primary mb-6">Client Profile</h2>
+
+            <!-- Profile Picture -->
+            <div class="flex justify-center mb-6">
+                {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover border-4 border-motogo-secondary">
+                {% else %}
+                    <div class="w-32 h-32 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-2xl font-bold">
+                        {{ profile.user.username|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Profile Details -->
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Username:</span>
+                    <span>{{ profile.user.username }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Phone:</span>
+                    <span>{{ profile.phone }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Address:</span>
+                    <span>{{ profile.address|default:"Not provided" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">User Type:</span>
+                    <span class="capitalize">{{ profile.user_type }}</span>
+                </div>
+            </div>
+
+            <!-- Edit Profile Button -->
+            <div class="mt-6">
+                <button id="editProfileBtn" class="w-full bg-motogo-secondary text-white py-2 px-4 rounded hover:bg-yellow-600 transition duration-200">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.getElementById('editProfileBtn').addEventListener('click', function() {
+            alert('Edit Profile functionality coming soon!');  // Placeholder for future edit form
+            // You can redirect to an edit page like: window.location.href = '/profile/edit/';
+        });
+    </script>
+{% endblock %}

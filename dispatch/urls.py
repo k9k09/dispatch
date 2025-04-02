@@ -1,12 +1,7 @@
 from django.contrib import admin
-from django.urls import path
-from system.views import home, login_view, signup, logout_view, dashboard # Importing logout view
+from django.urls import path, include
 
-urlpatterns = [  
-    path('', home, name='home'),  # Adding home URL pattern
+urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', login_view, name='login'),
-    path('signup/', signup, name='signup'),  # Correctly linking to the signup view
-    path('logout/', logout_view, name='logout'),  # Linking to the logout view
-    path('dashboard/', dashboard, name='dashboard'),  # Adding dashboard URL pattern
+    path('', include('system.urls')),  # Include the system app's URLs
 ]

@@ -10,11 +10,12 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Profile
 
 def home(request):
-    motorcycles = Motorcycle.objects.all()  # Removed filter for availability
-
-    return render(request, 'index.html', {'motorcycles': motorcycles})
+    return render(request, 'landingpage.html')
 
 # User Authentication Views
 def signup(request):
@@ -195,7 +196,7 @@ def dashboard(request):
             'nearby_bikes': nearby_bikes,
             'profile': profile,
         }
-        return render(request, 'dashboard.html', context)
+        return render(request, 'index.html', context)
     except Profile.DoesNotExist:
         # Create a profile for the user if one doesn't exist
         profile = Profile.objects.create(
@@ -237,3 +238,13 @@ def book_bike(request, bike_id):
         raise PermissionDenied("Bike not found")
 
     return render(request, 'find_riders.html', {'bike': bike_details})
+
+
+
+@login_required
+def client_profile(request):
+    profile = get_object_or_404(Profile, user=request.user, user_type='client')
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'Profile.html', context)
