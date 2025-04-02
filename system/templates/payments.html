@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}MotoGo - Payments{% endblock %}
+
+{% block page_title %}Payments{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Payment Overview -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-4">Payment Overview</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm text-gray-600">Total Spent</p>
+                <h3 class="text-xl font-bold text-blue-600">Ksh{{ total_spent|default:"0" }}</h3>
+            </div>
+            <div class="p-4 bg-green-50 rounded-lg">
+                <p class="text-sm text-gray-600">Pending Payments</p>
+                <h3 class="text-xl font-bold text-green-600">Ksh{{ pending_payments|default:"0" }}</h3>
+            </div>
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <p class="text-sm text-gray-600">Saved Methods</p>
+                <h3 class="text-xl font-bold text-purple-600">{{ payment_methods.count|default:"0" }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Payment Methods</h2>
+            <button id="add-payment-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Add Method
+            </button>
+        </div>
+        <div id="payment-methods-list">
+            {% for method in payment_methods %}
+            <div class="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50">
+                <div class="flex items-center space-x-4">
+                    <i data-lucide="{{ method.icon }}" class="w-6 h-6 text-gray-600"></i>
+                    <div>
+                        <p class="font-medium">{{ method.card_type }} ending in {{ method.last_four }}</p>
+                        <p class="text-sm text-gray-500">Expires {{ method.expiry_date|date:"m/Y" }}</p>
+                    </div>
+                </div>
+                <button class="text-red-600 hover:text-red-800 text-sm" onclick="removePaymentMethod('{{ method.id }}')">
+                    Remove
+                </button>
+            </div>
+            {% empty %}
+            <div class="text-center py-6">
+                <i data-lucide="credit-card" class="w-12 h-12 text-gray-300 mx-auto mb-2"></i>
+                <p class="text-gray-500">No payment methods added yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Transaction History</h2>
+            <a href="#" class="text-blue-600 text-sm hover:text-blue-800 flex items-center">
+                View All
+                <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+            </a>
+        </div>
+        <div class="divide-y">
+            {% for transaction in transactions %}
+            <div class="p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-gray-100">
+                        <i data-lucide="bike" class="w-5 h-5 text-gray-700"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">Ride Payment - {{ transaction.ride_id }}</h3>
+                        <p class="text-sm text-gray-500">{{ transaction.date|date:"D, M d, Y" }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="font-bold">Ksh{{ transaction.amount }}</span>
+                    <span class="px-3 py-1 rounded-full text-xs mt-1 {% if transaction.status == 'Completed' %}bg-green-100 text-green-800{% elif transaction.status == 'Pending' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ transaction.status }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center">
+                <i data-lucide="history" class="w-12 h-12 text-gray-300 mx-auto mb-2"></i>
+                <p class="text-gray-500">No transactions yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Payment Method Modal (Hidden by default) -->
+<div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Add Payment Method</h2>
+            <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <form id="payment-form" method="POST" action="{% url 'add_payment_method' %}">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Card Number</label>
+                    <input type="text" name="card_number" class="w-full p-3 border rounded-lg" placeholder="1234 5678 9012 3456" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Expiry Date</label>
+                        <input type="text" name="expiry_date" class="w-full p-3 border rounded-lg" placeholder="MM/YY" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">CVV</label>
+                        <input type="text" name="cvv" class="w-full p-3 border rounded-lg" placeholder="123" required>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    Add Card
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Modal handling
+    const addPaymentBtn = document.getElementById('add-payment-btn');
+    const paymentModal = document.getElementById('payment-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+
+    addPaymentBtn.addEventListener('click', () => {
+        paymentModal.classList.remove('hidden');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        paymentModal.classList.add('hidden');
+    });
+
+    // Remove payment method (placeholder - needs backend integration)
+    function removePaymentMethod(methodId) {
+        if (confirm('Are you sure you want to remove this payment method?')) {
+            // AJAX call to remove method would go here
+            console.log(`Removing payment method ${methodId}`);
+        }
+    }
+</script>
+{% endblock %}

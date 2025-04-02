@@ -37,3 +37,4 @@ class PaymentForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={'placeholder': 'Amount'}),
             'method': forms.Select(choices=Payment.PAYMENT_METHODS),
         }
+

@@ -137,7 +137,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # Channels and Redis Setup
 ASGI_APPLICATION = "dispatch.asgi.application"
 CHANNEL_LAYERS = {

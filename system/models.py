@@ -135,3 +135,66 @@ class Trip(models.Model):
     class Meta:
         ordering = ['-date', '-time']
         
+class Ride(models.Model):
+    RIDE_TYPES = (
+        ('standard', 'Standard'),
+        ('express', 'Express'),
+        ('share', 'Share'),
+    )
+    
+    STATUS_CHOICES = (
+        ('available', 'Available'),
+        ('booked', 'Booked'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    )
+    
+    rider = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rider_rides', null=True, blank=True)
+    from_location = models.CharField(max_length=255)
+    to_location = models.CharField(max_length=255)
+    ride_type = models.CharField(max_length=20, choices=RIDE_TYPES, default='standard')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    distance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    created_at = models.DateTimeField(auto_now_add=True)
+    scheduled_time = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.from_location} to {self.to_location} - {self.ride_type}"
+
+class PaymentMethod(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    card_type = models.CharField(max_length=50)  # e.g., Visa, MasterCard
+    last_four = models.CharField(max_length=4)
+    expiry_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.card_type} ending in {self.last_four}"
+
+    @property
+    def icon(self):
+        if "visa" in self.card_type.lower():
+            return "credit-card"
+        elif "mastercard" in self.card_type.lower():
+            return "credit-card"
+        return "credit-card"  # Default icon
+
+class Transaction(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Failed', 'Failed'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ride_id = models.CharField(max_length=100)  # Link to a ride
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Transaction {self.id} - {self.status}"
+    
+

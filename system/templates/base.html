@@ -114,7 +114,7 @@
                         <span class="sidebar-text font-medium">Find Rides</span>
                     </button>
                     
-                    <button onclick="window.location.href='#'" data-tab="payments" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'payments' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+                    <button onclick="window.location.href='{% url 'payments' %}'" data-tab="payments" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'payments' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
                         <i data-lucide="credit-card" class="w-5 h-5"></i>
                         <span class="sidebar-text font-medium">Payments</span>
                     </button>

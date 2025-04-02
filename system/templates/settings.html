@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - MotoGo{% endblock %}
+
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Settings Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">Account Settings</h1>
+        <p class="text-gray-600">Manage your MotoGo account preferences</p>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Profile Section -->
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <h2 class="text-lg font-semibold mb-4">Profile Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="w-full p-2 border border-gray-300 rounded-lg">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Profile" class="mt-2 w-24 h-24 rounded-full object-cover">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences Section -->
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <h2 class="text-lg font-semibold mb-4">Preferences</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="notifications" name="notifications" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {% if user.notifications_enabled %}checked{% endif %}>
+                        <label for="notifications" class="ml-2 text-sm text-gray-700">Enable Notifications</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Language</label>
+                        <select name="language" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option value="en" {% if user.language == 'en' %}selected{% endif %}>English</option>
+                            <option value="sw" {% if user.language == 'sw' %}selected{% endif %}>Swahili</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Change Password Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mt-6">
+        <h2 class="text-lg font-semibold mb-4">Change Password</h2>
+        <form method="POST" action="{% url 'change_password' %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                    <input type="password" name="current_password" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                    <input type="password" name="new_password" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                    <input type="password" name="confirm_password" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

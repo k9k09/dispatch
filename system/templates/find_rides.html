@@ -1,305 +1,80 @@
-{% extends 'base_dashboard.html' %}
-{% load static %}
+{% extends 'base.html' %}
 
-{% block title %}Find Nearby Motorcyclists - MotoGo{% endblock %}
+{% block title %}Find Rides - MotoGo{% endblock %}
+
+{% block page_title %}Find Rides{% endblock %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-50">
-    <!-- Sidebar - Same as in the improved dashboard -->
-    <div class="w-20 md:w-64 bg-gray-900 text-white transition-all duration-300 shadow-xl">
-        <!-- Logo area -->
-        <div class="p-4 md:p-6 border-b border-gray-800">
-            <div class="flex items-center justify-center md:justify-start space-x-2">
-                <i data-lucide="bike" class="w-8 h-8 text-blue-400"></i>
-                <span class="hidden md:block text-xl font-bold">MotoGo</span>
+<div class="max-w-7xl mx-auto">
+    <!-- Search Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Find Available Rides</h2>
+        <form method="GET" action="{% url 'find_rides' %}" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="relative">
+                    <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input type="text" name="from" placeholder="Starting Point" value="{{ request.GET.from }}" class="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+                <div class="relative">
+                    <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input type="text" name="to" placeholder="Destination" value="{{ request.GET.to }}" class="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
             </div>
-        </div>
-        
-        <!-- Navigation -->
-        <nav class="mt-4">
-<a href="{% url 'dashboard' %}" class="nav-item w-full flex items-center justify-center md:justify-start space-x-2 px-3 md:px-6 py-4 hover:bg-gray-800 border-l-4 border-transparent">
-
-                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-                <span class="hidden md:block">Dashboard</span>
-            </button>
-            <button data-tab="bookings" class="nav-item w-full flex items-center justify-center md:justify-start space-x-2 px-3 md:px-6 py-4 hover:bg-gray-800 border-l-4 border-transparent">
-                <i data-lucide="calendar" class="w-6 h-6"></i>
-                <span class="hidden md:block">My Trips</span>
-            </button>
-            <button data-tab="find" class="nav-item active w-full flex items-center justify-center md:justify-start space-x-2 px-3 md:px-6 py-4 hover:bg-gray-800 border-l-4 border-blue-500">
-                <i data-lucide="map" class="w-6 h-6"></i>
-                <span class="hidden md:block">Find Riders</span>
-            </button>
-            <button data-tab="payments" class="nav-item w-full flex items-center justify-center md:justify-start space-x-2 px-3 md:px-6 py-4 hover:bg-gray-800 border-l-4 border-transparent">
-                <i data-lucide="credit-card" class="w-6 h-6"></i>
-                <span class="hidden md:block">Payments</span>
-            </button>
-            <button data-tab="settings" class="nav-item w-full flex items-center justify-center md:justify-start space-x-2 px-3 md:px-6 py-4 hover:bg-gray-800 border-l-4 border-transparent">
-                <i data-lucide="settings" class="w-6 h-6"></i>
-                <span class="hidden md:block">Settings</span>
-            </button>
-            
-            <div class="absolute bottom-0 w-full mb-4">
-                <a href="{% url 'logout' %}" class="nav-item w-full flex items-center justify-center md:justify-start space-x-2 px-3 md:px-6 py-4 text-red-300 hover:bg-red-900/30">
-                    <i data-lucide="log-out" class="w-6 h-6"></i>
-                    <span class="hidden md:block">Logout</span>
-                </a>
+            <div class="flex items-center space-x-4">
+                <select name="ride_type" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <option value="">All Ride Types</option>
+                    <option value="standard" {% if request.GET.ride_type == 'standard' %}selected{% endif %}>Standard</option>
+                    <option value="express" {% if request.GET.ride_type == 'express' %}selected{% endif %}>Express</option>
+                    <option value="share" {% if request.GET.ride_type == 'share' %}selected{% endif %}>Share</option>
+                </select>
+                <button type="submit" class="bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                    Search Rides
+                </button>
             </div>
-        </nav>
+        </form>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Header -->
-        <header class="bg-white shadow-sm z-10">
-            <div class="flex items-center justify-between px-4 md:px-8 py-4">
-                <div class="flex items-center">
-                    <button class="p-2 mr-2 md:hidden text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
-                    </button>
-                    <div class="relative">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                        <input
-                            type="text"
-                            placeholder="Search by location"
-                            class="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-full w-56 md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
-                        >
-                    </div>
-                </div>
+    <!-- Available Rides -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Available Rides</h2>
+            <span class="text-sm text-gray-500">{{ rides.count }} results</span>
+        </div>
+        <div class="divide-y">
+            {% for ride in rides %}
+            <div class="p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <button class="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100">
-                        <i data-lucide="bell" class="w-6 h-6"></i>
-                    </button>
-                    <div class="flex items-center space-x-3 border rounded-full px-3 py-1 hover:shadow-md cursor-pointer">
-                        <img
-                            src="{{ user.profile_image|default:'https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&w=100&h=100' }}"
-                            alt="Profile"
-                            class="w-8 h-8 rounded-full border-2 border-gray-200"
-                        >
-                        <span class="font-medium hidden md:block">{{ user.get_full_name|default:user.username }}</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 hidden md:block"></i>
+                    <div class="p-3 rounded-full bg-primary-100">
+                        <i data-lucide="bike" class="w-5 h-5 text-primary-600"></i>
                     </div>
+                    <div>
+                        <h3 class="font-medium">{{ ride.from_location }} to {{ ride.to_location }}</h3>
+                        <p class="text-sm text-gray-500 capitalize">{{ ride.ride_type }} • {{ ride.distance|default:"N/A" }} km</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end space-y-2">
+                    <span class="font-bold">Ksh{{ ride.price }}</span>
+                    <a href="{% url 'book_ride' ride.id %}" class="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700">
+                        Book Now
+                    </a>
                 </div>
             </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-6">
-            <!-- Map Section -->
-            <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
-                <div class="h-64 md:h-96 bg-gray-200 relative">
-                    <!-- Map placeholder - in real app, replace with actual map -->
-                    <div class="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                        <p class="text-gray-500">Interactive Map Loading...</p>
-                    </div>
-                    
-                    <!-- Quick action buttons -->
-                    <div class="absolute bottom-4 right-4 flex space-x-2">
-                        <button class="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50">
-                            <i data-lucide="locate" class="w-5 h-5 text-blue-600"></i>
-                        </button>
-                        <button class="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50">
-                            <i data-lucide="layers" class="w-5 h-5 text-gray-700"></i>
-                        </button>
-                    </div>
+            {% empty %}
+            <div class="p-6 text-center">
+                <div class="mb-4">
+                    <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto"></i>
                 </div>
-                
-                <!-- Search Panel -->
-                <div class="p-4 md:p-6 bg-white">
-                    <h2 class="text-lg font-semibold mb-4">Find a Rider</h2>
-                    
-                    <form id="find-rider-form" class="space-y-4">
-                        {% csrf_token %}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="pickup" class="block text-sm font-medium text-gray-700 mb-1">Pickup Location</label>
-                                <div class="relative">
-                                    <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                                    <input type="text" id="pickup" name="pickup" placeholder="Enter pickup location" 
-                                        class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="destination" class="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-                                <div class="relative">
-                                    <i data-lucide="navigation" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                                    <input type="text" id="destination" name="destination" placeholder="Enter destination" 
-                                        class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                                <input type="date" id="date" name="date" min="{{ today|date:'Y-m-d' }}" 
-                                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                                <input type="time" id="time" name="time" 
-                                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="riders" class="block text-sm font-medium text-gray-700 mb-1">Number of Riders</label>
-                                <select id="riders" name="riders" 
-                                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="1">1 person</option>
-                                    <option value="2">2 people</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" 
-                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center">
-                            <i data-lucide="search" class="w-5 h-5 mr-2"></i>
-                            Find Nearby Motorcyclists
-                        </button>
-                    </form>
-                </div>
+                <p class="text-gray-500">No rides found matching your criteria</p>
+                <p class="text-sm text-gray-400 mt-2">Try adjusting your search parameters</p>
             </div>
-            
-            <!-- Available Motorcyclists -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="p-4 md:p-6 border-b flex items-center justify-between">
-                    <h2 class="text-lg font-semibold">Available Motorcyclists Near You</h2>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-500">Filter:</span>
-                        <select class="text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>All</option>
-                            <option>Top Rated</option>
-                            <option>Nearest</option>
-                            <option>Lowest Price</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="divide-y">
-                    <!-- Motorcyclist Item 1 -->
-                    <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div class="flex items-center space-x-4">
-                                <img src="https://images.unsplash.com/photo-1531384441138-2736e62e0919?auto=format&fit=crop&w=100&h=100" alt="Rider" 
-                                    class="w-16 h-16 rounded-full border-2 border-gray-200 object-cover">
-                                <div>
-                                    <div class="flex items-center">
-                                        <h3 class="font-medium">John Doe</h3>
-                                        <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Online</span>
-                                    </div>
-                                    <div class="flex items-center mt-1 text-sm text-gray-500">
-                                        <i data-lucide="star" class="w-4 h-4 text-yellow-500 mr-1"></i>
-                                        <span>4.8 (238 trips)</span>
-                                        <span class="mx-2">•</span>
-                                        <span>2.3 km away</span>
-                                    </div>
-                                    <p class="mt-2 text-sm text-gray-600">Honda CBR 600 • Black • KBX 123H</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 md:mt-0 flex flex-col items-end">
-                                <span class="font-bold text-blue-600">Ksh350/trip</span>
-                                <span class="text-sm text-gray-500">Est. arrival: 5 mins</span>
-                                <button class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                                    Request Ride
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Motorcyclist Item 2 -->
-                    <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div class="flex items-center space-x-4">
-                                <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&h=100" alt="Rider" 
-                                    class="w-16 h-16 rounded-full border-2 border-gray-200 object-cover">
-                                <div>
-                                    <div class="flex items-center">
-                                        <h3 class="font-medium">Michael Smith</h3>
-                                        <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Online</span>
-                                    </div>
-                                    <div class="flex items-center mt-1 text-sm text-gray-500">
-                                        <i data-lucide="star" class="w-4 h-4 text-yellow-500 mr-1"></i>
-                                        <span>4.9 (412 trips)</span>
-                                        <span class="mx-2">•</span>
-                                        <span>3.5 km away</span>
-                                    </div>
-                                    <p class="mt-2 text-sm text-gray-600">Yamaha R15 • Red • KCT 789J</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 md:mt-0 flex flex-col items-end">
-                                <span class="font-bold text-blue-600">Ksh380/trip</span>
-                                <span class="text-sm text-gray-500">Est. arrival: 8 mins</span>
-                                <button class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                                    Request Ride
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Motorcyclist Item 3 -->
-                    <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div class="flex items-center space-x-4">
-                                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=100&h=100" alt="Rider" 
-                                    class="w-16 h-16 rounded-full border-2 border-gray-200 object-cover">
-                                <div>
-                                    <div class="flex items-center">
-                                        <h3 class="font-medium">David Kamau</h3>
-                                        <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Online</span>
-                                    </div>
-                                    <div class="flex items-center mt-1 text-sm text-gray-500">
-                                        <i data-lucide="star" class="w-4 h-4 text-yellow-500 mr-1"></i>
-                                        <span>4.7 (187 trips)</span>
-                                        <span class="mx-2">•</span>
-                                        <span>1.8 km away</span>
-                                    </div>
-                                    <p class="mt-2 text-sm text-gray-600">Bajaj Boxer • Blue • KDG 456P</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 md:mt-0 flex flex-col items-end">
-                                <span class="font-bold text-blue-600">Ksh320/trip</span>
-                                <span class="text-sm text-gray-500">Est. arrival: 3 mins</span>
-                                <button class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                                    Request Ride
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+            {% endfor %}
+        </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle mobile sidebar toggle
-        const menuButton = document.querySelector('[data-lucide="menu"]');
-        const sidebar = document.querySelector('.bg-gray-900');
-        
-        menuButton.addEventListener('click', function() {
-            sidebar.classList.toggle('w-20');
-            sidebar.classList.toggle('w-64');
-        });
-        
-        // Handle tab navigation
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', function() {
-                navItems.forEach(ni => ni.classList.remove('active', 'border-blue-500'));
-                navItems.forEach(ni => ni.classList.add('border-transparent'));
-                this.classList.add('active', 'border-blue-500');
-                this.classList.remove('border-transparent');
-            });
-        });
-        
-        // Handle form submission
-        const form = document.getElementById('find-rider-form');
-        
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // In a real app, you would fetch nearby motorcyclists based on the form inputs
-            alert('Searching for motorcyclists near your location');
-        });
-    });
+    lucide.createIcons();
 </script>
 {% endblock %}

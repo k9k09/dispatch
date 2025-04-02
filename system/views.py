@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from .models import Ride  # Add this if missing
+from .models import PaymentMethod  # Add this if missing
+from .models import Transaction  # Add this if missing
 from .models import Profile, Motorcycle, RideRequest, Payment, Rating
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model, login, logout
@@ -289,3 +292,89 @@ def request_ride(request):
 
     # For GET request, render the form
     return render(request, 'request_ride.html')
+
+@login_required
+def find_rides(request):
+    # Get search parameters from GET request
+    from_location = request.GET.get('from', '')
+    to_location = request.GET.get('to', '')
+    ride_type = request.GET.get('ride_type', '')
+
+    # Filter rides based on search criteria
+    rides = Ride.objects.filter(status='available')
+    
+    if from_location:
+        rides = rides.filter(from_location__icontains=from_location)
+    if to_location:
+        rides = rides.filter(to_location__icontains=to_location)
+    if ride_type:
+        rides = rides.filter(ride_type=ride_type)
+
+    context = {
+        'rides': rides,
+    }
+    return render(request, 'find_rides.html', context)
+
+@login_required
+def book_ride(request, ride_id):
+    ride = get_object_or_404(Ride, id=ride_id, status='available')
+    
+    if request.method == 'POST':
+        # Book the ride
+        ride.rider = request.user
+        ride.status = 'booked'
+        ride.save()
+        return redirect('dashboard')  # Redirect to dashboard or a confirmation page
+    
+    # For GET request, you might want to show a confirmation page
+    context = {
+        'ride': ride,
+    }
+    return render(request, 'book_ride.html', context)  # You'll need to create this template if you want a confirmation step
+
+@login_required
+def payments(request):
+    # Get user's payment methods and transactions
+    payment_methods = PaymentMethod.objects.filter(user=request.user)
+    transactions = Transaction.objects.filter(user=request.user).order_by('-date')[:5]  # Last 5 transactions
+    
+    # Calculate totals
+    total_spent = Transaction.objects.filter(user=request.user, status='Completed').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    pending_payments = Transaction.objects.filter(user=request.user, status='Pending').aggregate(models.Sum('amount'))['amount__sum'] or 0
+
+    context = {
+        'payment_methods': payment_methods,
+        'transactions': transactions,
+        'total_spent': total_spent,
+        'pending_payments': pending_payments,
+    }
+    return render(request, 'payments.html', context)
+
+@login_required
+def add_payment_method(request):
+    if request.method == 'POST':
+        card_number = request.POST.get('card_number')
+        expiry_date = request.POST.get('expiry_date')
+        cvv = request.POST.get('cvv')
+
+        # Basic validation (in a real app, use a payment gateway like Stripe)
+        try:
+            expiry = datetime.datetime.strptime(expiry_date, '%m/%y')
+            last_four = card_number[-4:]
+            card_type = "Visa" if card_number.startswith('4') else "MasterCard"  # Simplified detection
+
+            PaymentMethod.objects.create(
+                user=request.user,
+                card_type=card_type,
+                last_four=last_four,
+                expiry_date=expiry
+            )
+            messages.success(request, "Payment method added successfully!")
+            return redirect('payments')
+        except ValueError:
+            messages.error(request, "Invalid expiry date format. Use MM/YY.")
+        except Exception as e:
+            messages.error(request, "An error occurred. Please try again.")
+
+    return redirect('payments')  # Redirect back if not POST
+
