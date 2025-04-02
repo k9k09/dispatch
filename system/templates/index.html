@@ -19,19 +19,7 @@
                     >
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <button class="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 relative">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                </button>
-                <a href="{% url 'client_profile' %}" class="flex items-center space-x-3 border rounded-full px-3 py-1 hover:shadow-md cursor-pointer">
-                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                        {{ user.get_full_name|default:user.username|slice:":1"|upper }}
-                    </div>
-                    <span class="font-medium hidden md:block">{{ user.get_full_name|default:user.username }}</span>
-                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 hidden md:block"></i>
-                </a>
-            </div>
+            
         </div>
     </header>
 

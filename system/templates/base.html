@@ -104,7 +104,7 @@
                         <span class="sidebar-text font-medium">Dashboard</span>
                     </button>
                     
-                    <button onclick="window.location.href='#'" data-tab="bookings" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'bookings' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+                    <button onclick="window.location.href='{% url '' %}'" data-tab="bookings" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'bookings' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                         <span class="sidebar-text font-medium">My Trips</span>
                     </button>
@@ -171,8 +171,8 @@
                             
                             <!-- Dropdown menu -->
                             <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden group-hover:block">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
+                                
+                                <a href="{% url 'client_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
                                 <div class="border-t border-gray-200 my-1"></div>
                                 <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
                             </div>
