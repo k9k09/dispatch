@@ -1,0 +1,468 @@
+{% extends 'base.html' %}
+
+{% block title %}Request a Ride - MotoGo{% endblock %}
+
+{% block page_title %}Request a Ride{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Request a Ride</h2>
+        
+        <!-- Map Container -->
+        <div class="mb-6 border rounded-lg overflow-hidden">
+            <div id="map" class="h-64 w-full"></div>
+        </div>
+        
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Pickup and Drop-off Locations -->
+            <div class="flex flex-col space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="flex flex-col items-center">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <div class="w-0.5 h-12 bg-gray-300"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div class="flex flex-col space-y-4 flex-1">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="from_location" 
+                                name="from_location" 
+                                placeholder="Pickup location" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                required
+                            >
+                            <button type="button" id="get-current-location" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-blue-500">
+                                <i data-lucide="locate" class="w-5 h-5"></i>
+                            </button>
+                            <!-- Hidden fields for coordinates -->
+                            <input type="hidden" id="pickup_latitude" name="pickup_latitude">
+                            <input type="hidden" id="pickup_longitude" name="pickup_longitude">
+                        </div>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="to_location" 
+                                name="to_location" 
+                                placeholder="Drop-off location" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                required
+                            >
+                            <!-- Hidden fields for coordinates -->
+                            <input type="hidden" id="dropoff_latitude" name="dropoff_latitude">
+                            <input type="hidden" id="dropoff_longitude" name="dropoff_longitude">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ride Type Selection -->
+            <div class="flex flex-col space-y-3">
+                <h3 class="font-medium text-gray-700">Select Ride Type</h3>
+                <div class="flex space-x-3 overflow-x-auto pb-2">
+                    <label class="flex-none bg-blue-50 border-2 border-blue-500 rounded-lg p-3 flex flex-col items-center w-24 cursor-pointer">
+                        <input type="radio" name="ride_type" value="Standard" class="hidden" checked>
+                        <i data-lucide="bike" class="w-6 h-6 text-blue-600 mb-1"></i>
+                        <span class="text-sm font-medium">Standard</span>
+                        <span class="text-xs text-gray-500">Ksh250</span>
+                    </label>
+                    <label class="flex-none bg-white border border-gray-200 rounded-lg p-3 flex flex-col items-center w-24 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                        <input type="radio" name="ride_type" value="Express" class="hidden">
+                        <i data-lucide="zap" class="w-6 h-6 text-purple-600 mb-1"></i>
+                        <span class="text-sm font-medium">Express</span>
+                        <span class="text-xs text-gray-500">Ksh350</span>
+                    </label>
+                    <label class="flex-none bg-white border border-gray-200 rounded-lg p-3 flex flex-col items-center w-24 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                        <input type="radio" name="ride_type" value="Share" class="hidden">
+                        <i data-lucide="users" class="w-6 h-6 text-green-600 mb-1"></i>
+                        <span class="text-sm font-medium">Share</span>
+                        <span class="text-xs text-gray-500">Ksh150</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Date and Time (Optional) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input 
+                        type="date" 
+                        name="date" 
+                        id="date" 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+                <div>
+                    <label for="time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                    <input 
+                        type="time" 
+                        name="time" 
+                        id="time" 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+            </div>
+
+            <!-- Price (Read-only for now) -->
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Estimated Price</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">Ksh</span>
+                    <input 
+                        type="text" 
+                        name="price" 
+                        id="price" 
+                        value="250" 
+                        class="w-full pl-12 p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" 
+                        readonly
+                    >
+                </div>
+                <p id="distance-display" class="text-sm text-gray-500 mt-1">Estimated distance: Calculating...</p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex space-x-3">
+                <a href="{% url 'my_trips' %}" class="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors text-center">
+                    Cancel
+                </a>
+                <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    Request Ride
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create Lucide icons
+        lucide.createIcons();
+        
+        // Initialize map
+        const map = L.map('map').setView([-1.286389, 36.817223], 13); // Nairobi coordinates as default
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Create markers for pickup and dropoff
+        let pickupMarker = null;
+        let dropoffMarker = null;
+        let routingControl = null;
+        
+        // Function to update the route
+        function updateRoute() {
+            if (pickupMarker && dropoffMarker) {
+                // Remove previous routing if exists
+                if (routingControl) {
+                    map.removeControl(routingControl);
+                }
+                
+                // Add new routing
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(pickupMarker.getLatLng().lat, pickupMarker.getLatLng().lng),
+                        L.latLng(dropoffMarker.getLatLng().lat, dropoffMarker.getLatLng().lng)
+                    ],
+                    routeWhileDragging: true,
+                    showAlternatives: false,
+                    lineOptions: {
+                        styles: [{ color: '#3B82F6', opacity: 0.8, weight: 5 }]
+                    },
+                    createMarker: function() { return null; }, // Don't create additional markers
+                }).addTo(map);
+                
+                // Update distance and price when route is calculated
+                routingControl.on('routesfound', function(e) {
+                    const routes = e.routes;
+                    const distance = routes[0].summary.totalDistance / 1000; // Distance in km
+                    
+                    // Update distance display
+                    document.getElementById('distance-display').textContent = 
+                        `Estimated distance: ${distance.toFixed(1)} km`;
+                    
+                    // Update price based on distance and ride type
+                    updatePrice(distance);
+                });
+            }
+        }
+        
+        // Function to update price based on distance and ride type
+        function updatePrice(distance) {
+            const rideType = document.querySelector('input[name="ride_type"]:checked').value;
+            let basePrice = 0;
+            
+            if (rideType === 'Standard') {
+                basePrice = 250;
+            } else if (rideType === 'Express') {
+                basePrice = 350;
+            } else if (rideType === 'Share') {
+                basePrice = 150;
+            }
+            
+            // Simple price calculation: base price + distance factor
+            const distanceFactor = distance * 20; // 20 Ksh per km
+            const totalPrice = Math.round(basePrice + distanceFactor);
+            
+            document.getElementById('price').value = totalPrice;
+        }
+        
+        // Handle map clicks for setting locations
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // If pickup not set, set pickup
+            if (!pickupMarker) {
+                pickupMarker = L.marker([lat, lng], {
+                    draggable: true,
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color:#3B82F6;width:15px;height:15px;border-radius:50%;"></div>`,
+                        iconSize: [15, 15]
+                    })
+                }).addTo(map);
+                
+                document.getElementById('pickup_latitude').value = lat;
+                document.getElementById('pickup_longitude').value = lng;
+                
+                // Get address for the clicked location
+                getAddress(lat, lng, 'from_location');
+                
+                // Handle marker drag
+                pickupMarker.on('dragend', function() {
+                    const newPos = pickupMarker.getLatLng();
+                    document.getElementById('pickup_latitude').value = newPos.lat;
+                    document.getElementById('pickup_longitude').value = newPos.lng;
+                    getAddress(newPos.lat, newPos.lng, 'from_location');
+                    updateRoute();
+                });
+            } 
+            // If pickup is set but not dropoff, set dropoff
+            else if (!dropoffMarker) {
+                dropoffMarker = L.marker([lat, lng], {
+                    draggable: true,
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color:#10B981;width:15px;height:15px;border-radius:50%;"></div>`,
+                        iconSize: [15, 15]
+                    })
+                }).addTo(map);
+                
+                document.getElementById('dropoff_latitude').value = lat;
+                document.getElementById('dropoff_longitude').value = lng;
+                
+                // Get address for the clicked location
+                getAddress(lat, lng, 'to_location');
+                
+                // Handle marker drag
+                dropoffMarker.on('dragend', function() {
+                    const newPos = dropoffMarker.getLatLng();
+                    document.getElementById('dropoff_latitude').value = newPos.lat;
+                    document.getElementById('dropoff_longitude').value = newPos.lng;
+                    getAddress(newPos.lat, newPos.lng, 'to_location');
+                    updateRoute();
+                });
+                
+                // Calculate route
+                updateRoute();
+            }
+        });
+        
+        // Get current location
+        document.getElementById('get-current-location').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Set map view to current location
+                    map.setView([lat, lng], 15);
+                    
+                    // Set pickup marker
+                    if (pickupMarker) {
+                        pickupMarker.setLatLng([lat, lng]);
+                    } else {
+                        pickupMarker = L.marker([lat, lng], {
+                            draggable: true,
+                            icon: L.divIcon({
+                                className: 'custom-div-icon',
+                                html: `<div style="background-color:#3B82F6;width:15px;height:15px;border-radius:50%;"></div>`,
+                                iconSize: [15, 15]
+                            })
+                        }).addTo(map);
+                        
+                        // Handle marker drag
+                        pickupMarker.on('dragend', function() {
+                            const newPos = pickupMarker.getLatLng();
+                            document.getElementById('pickup_latitude').value = newPos.lat;
+                            document.getElementById('pickup_longitude').value = newPos.lng;
+                            getAddress(newPos.lat, newPos.lng, 'from_location');
+                            updateRoute();
+                        });
+                    }
+                    
+                    document.getElementById('pickup_latitude').value = lat;
+                    document.getElementById('pickup_longitude').value = lng;
+                    
+                    // Get address for the current location
+                    getAddress(lat, lng, 'from_location');
+                    
+                    // Update route if dropoff is set
+                    if (dropoffMarker) {
+                        updateRoute();
+                    }
+                }, function(error) {
+                    console.error("Error getting location: ", error);
+                    alert("Could not get your location. Please ensure location services are enabled.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        });
+        
+        // Function to get address from coordinates (using OpenStreetMap Nominatim)
+        function getAddress(lat, lng, fieldId) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById(fieldId).value = data.display_name;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching address: ", error);
+                });
+        }
+        
+        // Handle manual input of addresses
+        document.getElementById('from_location').addEventListener('change', function() {
+            if (this.value.trim() !== '') {
+                geocodeAddress(this.value, 'pickup');
+            }
+        });
+        
+        document.getElementById('to_location').addEventListener('change', function() {
+            if (this.value.trim() !== '') {
+                geocodeAddress(this.value, 'dropoff');
+            }
+        });
+        
+        // Function to geocode address to coordinates
+        function geocodeAddress(address, type) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        
+                        if (type === 'pickup') {
+                            if (pickupMarker) {
+                                pickupMarker.setLatLng([lat, lng]);
+                            } else {
+                                pickupMarker = L.marker([lat, lng], {
+                                    draggable: true,
+                                    icon: L.divIcon({
+                                        className: 'custom-div-icon',
+                                        html: `<div style="background-color:#3B82F6;width:15px;height:15px;border-radius:50%;"></div>`,
+                                        iconSize: [15, 15]
+                                    })
+                                }).addTo(map);
+                                
+                                pickupMarker.on('dragend', function() {
+                                    const newPos = pickupMarker.getLatLng();
+                                    document.getElementById('pickup_latitude').value = newPos.lat;
+                                    document.getElementById('pickup_longitude').value = newPos.lng;
+                                    getAddress(newPos.lat, newPos.lng, 'from_location');
+                                    updateRoute();
+                                });
+                            }
+                            
+                            document.getElementById('pickup_latitude').value = lat;
+                            document.getElementById('pickup_longitude').value = lng;
+                            map.setView([lat, lng], 15);
+                        } else if (type === 'dropoff') {
+                            if (dropoffMarker) {
+                                dropoffMarker.setLatLng([lat, lng]);
+                            } else {
+                                dropoffMarker = L.marker([lat, lng], {
+                                    draggable: true,
+                                    icon: L.divIcon({
+                                        className: 'custom-div-icon',
+                                        html: `<div style="background-color:#10B981;width:15px;height:15px;border-radius:50%;"></div>`,
+                                        iconSize: [15, 15]
+                                    })
+                                }).addTo(map);
+                                
+                                dropoffMarker.on('dragend', function() {
+                                    const newPos = dropoffMarker.getLatLng();
+                                    document.getElementById('dropoff_latitude').value = newPos.lat;
+                                    document.getElementById('dropoff_longitude').value = newPos.lng;
+                                    getAddress(newPos.lat, newPos.lng, 'to_location');
+                                    updateRoute();
+                                });
+                            }
+                            
+                            document.getElementById('dropoff_latitude').value = lat;
+                            document.getElementById('dropoff_longitude').value = lng;
+                        }
+                        
+                        // Update route if both markers exist
+                        if (pickupMarker && dropoffMarker) {
+                            updateRoute();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error geocoding address: ", error);
+                });
+        }
+        
+        // Handle ride type selection for updating price
+        const rideTypes = document.querySelectorAll('input[name="ride_type"]');
+        rideTypes.forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Update styling
+                const labels = document.querySelectorAll('.flex-none');
+                labels.forEach(label => {
+                    label.classList.remove('bg-blue-50', 'border-blue-500');
+                    label.classList.add('bg-white', 'border-gray-200');
+                });
+                const selectedLabel = this.parentElement;
+                selectedLabel.classList.remove('bg-white', 'border-gray-200');
+                selectedLabel.classList.add('bg-blue-50', 'border-blue-500');
+                
+                // Update price if route exists
+                if (routingControl) {
+                    const routes = routingControl.getRouter().getRoutes();
+                    if (routes && routes.length > 0) {
+                        const distance = routes[0].summary.totalDistance / 1000;
+                        updatePrice(distance);
+                    } else {
+                        // Just update with base price if no route
+                        if (this.value === 'Standard') document.getElementById('price').value = '250';
+                        else if (this.value === 'Express') document.getElementById('price').value = '350';
+                        else if (this.value === 'Share') document.getElementById('price').value = '150';
+                    }
+                } else {
+                    // Just update with base price if no route
+                    if (this.value === 'Standard') document.getElementById('price').value = '250';
+                    else if (this.value === 'Express') document.getElementById('price').value = '350';
+                    else if (this.value === 'Share') document.getElementById('price').value = '150';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

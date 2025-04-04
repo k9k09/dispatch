@@ -1,3 +1,5 @@
+from datetime import timezone
+import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,7 +10,7 @@ from .models import Transaction  # Add this if missing
 from .models import Profile, Motorcycle, RideRequest, Payment, Rating
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model, login, logout
-from django.utils.timezone import now
+from django.utils.timezone import timezone, now
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -38,7 +40,7 @@ def signup(request):
             return redirect('home')
     else:
         form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'client/signup.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
@@ -50,7 +52,7 @@ def login_view(request):
             return redirect('dashboard')
     else:
         form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'client/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
@@ -104,7 +106,7 @@ def create_ride_request(request):
 @login_required
 def ride_detail(request, ride_id):
     ride_request = get_object_or_404(RideRequest, id=ride_id)
-    return render(request, 'ride_detail.html', {'ride_request': ride_request})
+    return render(request, 'client/ride_detail.html', {'ride_request': ride_request})
 
 # Accept Ride Request (Driver)
 @login_required
@@ -158,7 +160,7 @@ def add_rating(request, ride_id):
 
         return JsonResponse({'error': 'Invalid rating value'}, status=400)
 
-    return render(request, 'add_rating.html', {'ride_request': ride_request})
+    return render(request, 'client/add_rating.html', {'ride_request': ride_request})
 
 # User Dashboard
 @login_required
@@ -199,7 +201,7 @@ def dashboard(request):
             'nearby_bikes': nearby_bikes,
             'profile': profile,
         }
-        return render(request, 'index.html', context)
+        return render(request, 'client/index.html', context)
     except Profile.DoesNotExist:
         # Create a profile for the user if one doesn't exist
         profile = Profile.objects.create(
@@ -240,7 +242,7 @@ def book_bike(request, bike_id):
     if not bike_details:
         raise PermissionDenied("Bike not found")
 
-    return render(request, 'find_riders.html', {'bike': bike_details})
+    return render(request, 'client/find_riders.html', {'bike': bike_details})
 
 
 
@@ -250,7 +252,7 @@ def client_profile(request):
     context = {
         'profile': profile,
     }
-    return render(request, 'Profile.html', context)
+    return render(request, 'client/Profile.html', context)
 
 from .models import Trip
 @login_required
@@ -261,7 +263,7 @@ def my_trips(request):
     context = {
         'trips': trips,
     }
-    return render(request, 'my_trips.html', context)
+    return render(request, 'client/my_trips.html', context)
 
 @login_required
 def request_ride(request):
@@ -270,8 +272,8 @@ def request_ride(request):
         from_location = request.POST.get('from_location')
         to_location = request.POST.get('to_location')
         ride_type = request.POST.get('ride_type', 'Standard')
-        date = request.POST.get('date', timezone.now().date())  # Default to today if not provided
-        time = request.POST.get('time', timezone.now().time())  # Default to now if not provided
+        date = request.POST.get('date', now().date())  # Default to today if not provided
+        time = request.POST.get('time', now().time())  # Default to now if not provided
         price = request.POST.get('price', 250)  # Default price, adjust based on ride_type in real app
 
         # Create a new Trip instance
@@ -291,7 +293,7 @@ def request_ride(request):
         return redirect('my_trips')
 
     # For GET request, render the form
-    return render(request, 'request_ride.html')
+    return render(request, 'client/request_ride.html')
 
 @login_required
 def find_rides(request):
@@ -313,7 +315,7 @@ def find_rides(request):
     context = {
         'rides': rides,
     }
-    return render(request, 'find_rides.html', context)
+    return render(request, 'client/find_rides.html', context)
 
 @login_required
 def book_ride(request, ride_id):
@@ -330,7 +332,7 @@ def book_ride(request, ride_id):
     context = {
         'ride': ride,
     }
-    return render(request, 'book_ride.html', context)  # You'll need to create this template if you want a confirmation step
+    return render(request, 'client/book_ride.html', context)  # You'll need to create this template if you want a confirmation step
 
 @login_required
 def payments(request):
@@ -348,7 +350,7 @@ def payments(request):
         'total_spent': total_spent,
         'pending_payments': pending_payments,
     }
-    return render(request, 'payments.html', context)
+    return render(request, 'client/payments.html', context)
 
 @login_required
 def add_payment_method(request):

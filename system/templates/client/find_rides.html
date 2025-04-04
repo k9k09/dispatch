@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Rides - MotoGo{% endblock %}
+
+{% block page_title %}Find Rides{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Map Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Ride Map</h2>
+        <div id="map" class="h-80 w-full rounded-lg border"></div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Find Available Rides</h2>
+        <form method="GET" action="{% url 'find_rides' %}" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="relative">
+                    <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input 
+                        type="text" 
+                        id="from_location" 
+                        name="from" 
+                        placeholder="Starting Point" 
+                        value="{{ request.GET.from }}" 
+                        class="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                    <input type="hidden" id="from_latitude" name="from_latitude" value="{{ request.GET.from_latitude }}">
+                    <input type="hidden" id="from_longitude" name="from_longitude" value="{{ request.GET.from_longitude }}">
+                </div>
+                <div class="relative">
+                    <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input 
+                        type="text" 
+                        id="to_location" 
+                        name="to" 
+                        placeholder="Destination" 
+                        value="{{ request.GET.to }}" 
+                        class="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                    <input type="hidden" id="to_latitude" name="to_latitude" value="{{ request.GET.to_latitude }}">
+                    <input type="hidden" id="to_longitude" name="to_longitude" value="{{ request.GET.to_longitude }}">
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <select name="ride_type" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <option value="">All Ride Types</option>
+                    <option value="standard" {% if request.GET.ride_type == 'standard' %}selected{% endif %}>Standard</option>
+                    <option value="express" {% if request.GET.ride_type == 'express' %}selected{% endif %}>Express</option>
+                    <option value="share" {% if request.GET.ride_type == 'share' %}selected{% endif %}>Share</option>
+                </select>
+                <button type="submit" class="bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                    Search Rides
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Available Rides -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Available Rides</h2>
+            <span class="text-sm text-gray-500">{{ rides.count }} results</span>
+        </div>
+        <div class="divide-y">
+            {% for ride in rides %}
+            <div class="p-6 hover:bg-gray-50 transition-colors flex items-center justify-between ride-item" 
+                 data-lat-from="{{ ride.from_latitude }}" 
+                 data-lng-from="{{ ride.from_longitude }}"
+                 data-lat-to="{{ ride.to_latitude }}"
+                 data-lng-to="{{ ride.to_longitude }}"
+                 data-id="{{ ride.id }}">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-primary-100">
+                        <i data-lucide="bike" class="w-5 h-5 text-primary-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">{{ ride.from_location }} to {{ ride.to_location }}</h3>
+                        <p class="text-sm text-gray-500 capitalize">{{ ride.ride_type }} • {{ ride.distance|default:"N/A" }} km</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end space-y-2">
+                    <span class="font-bold">Ksh{{ ride.price }}</span>
+                    <a href="{% url 'book_ride' ride.id %}" class="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700">
+                        Book Now
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center">
+                <div class="mb-4">
+                    <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto"></i>
+                </div>
+                <p class="text-gray-500">No rides found matching your criteria</p>
+                <p class="text-sm text-gray-400 mt-2">Try adjusting your search parameters</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create Lucide icons
+        lucide.createIcons();
+        
+        // Initialize map
+        const map = L.map('map').setView([-1.286389, 36.817223], 13); // Nairobi coordinates as default
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Variables for markers and routing
+        let fromMarker = null;
+        let toMarker = null;
+        let routingControl = null;
+        let bikeMarkers = {};
+
+        // Add bike markers (for available rides)
+        const rideItems = document.querySelectorAll('.ride-item');
+        rideItems.forEach(item => {
+            const fromLat = parseFloat(item.dataset.latFrom);
+            const fromLng = parseFloat(item.dataset.lngFrom);
+            const toLat = parseFloat(item.dataset.latTo);
+            const toLng = parseFloat(item.dataset.lngTo);
+            const rideId = item.dataset.id;
+            
+            if (isNaN(fromLat) || isNaN(fromLng)) return;
+            
+            // Create bike marker at pickup location
+            const bikeIcon = L.divIcon({
+                html: '<i class="bike-icon" data-lucide="bike"></i>',
+                className: 'bike-marker',
+                iconSize: [30, 30]
+            });
+            
+            const marker = L.marker([fromLat, fromLng], {icon: bikeIcon}).addTo(map);
+            bikeMarkers[rideId] = marker;
+            
+            // Add popup with ride info
+            marker.bindPopup(`
+                <strong>Ride #${rideId}</strong><br>
+                From: ${item.querySelector('h3').textContent.split(' to ')[0]}<br>
+                To: ${item.querySelector('h3').textContent.split(' to ')[1]}<br>
+                ${item.querySelector('p').textContent}<br>
+                <a href="/book-ride/${rideId}" class="popup-book-btn">Book Now</a>
+            `);
+            
+            // Highlight route when hovering over list item
+            item.addEventListener('mouseenter', () => {
+                highlightRoute(fromLat, fromLng, toLat, toLng);
+                marker.openPopup();
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                if (routingControl) {
+                    map.removeControl(routingControl);
+                    routingControl = null;
+                }
+                marker.closePopup();
+            });
+        });
+
+        // Function to highlight a route on the map
+        function highlightRoute(fromLat, fromLng, toLat, toLng) {
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+            
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(fromLat, fromLng),
+                    L.latLng(toLat, toLng)
+                ],
+                routeWhileDragging: false,
+                showAlternatives: false,
+                fitSelectedRoutes: true,
+                show: false, // Hide the routing instructions
+                lineOptions: {
+                    styles: [{color: '#3B82F6', weight: 5}]
+                }
+            }).addTo(map);
+        }
+
+        // Setup place search autocomplete
+        function setupLocationAutocomplete(inputId, latInputId, lngInputId) {
+            const input = document.getElementById(inputId);
+            const latInput = document.getElementById(latInputId);
+            const lngInput = document.getElementById(lngInputId);
+            
+            // Use Nominatim API for geocoding (OpenStreetMap's service)
+            input.addEventListener('input', debounce(async function() {
+                if (input.value.length < 3) return;
+                
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input.value)}&limit=5`);
+                    const data = await response.json();
+                    
+                    showSuggestions(data, input, latInput, lngInput);
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                }
+            }, 300));
+        }
+        
+        // Show location suggestions 
+        function showSuggestions(suggestions, input, latInput, lngInput) {
+            // Remove any existing suggestions
+            const existingSuggestions = document.querySelector('.location-suggestions');
+            if (existingSuggestions) {
+                existingSuggestions.remove();
+            }
+            
+            if (suggestions.length === 0) return;
+            
+            // Create suggestions container
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'location-suggestions absolute z-10 bg-white w-full mt-1 rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto';
+            input.parentNode.appendChild(suggestionsContainer);
+            
+            // Add each suggestion
+            suggestions.forEach(place => {
+                const item = document.createElement('div');
+                item.className = 'p-3 hover:bg-gray-100 cursor-pointer';
+                item.textContent = place.display_name;
+                
+                item.addEventListener('click', () => {
+                    input.value = place.display_name;
+                    latInput.value = place.lat;
+                    lngInput.value = place.lon;
+                    
+                    // Update marker on map
+                    updateMapMarker(inputId, place.lat, place.lon);
+                    
+                    // Remove suggestions
+                    suggestionsContainer.remove();
+                });
+                
+                suggestionsContainer.appendChild(item);
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function closeEvent(e) {
+                if (!suggestionsContainer.contains(e.target) && e.target !== input) {
+                    suggestionsContainer.remove();
+                    document.removeEventListener('click', closeEvent);
+                }
+            });
+        }
+        
+        // Update marker on map
+        function updateMapMarker(inputId, lat, lng) {
+            const coords = [parseFloat(lat), parseFloat(lng)];
+            
+            if (inputId === 'from_location') {
+                if (fromMarker) {
+                    fromMarker.setLatLng(coords);
+                } else {
+                    fromMarker = L.marker(coords, {
+                        icon: L.divIcon({
+                            html: '<i class="marker-icon" data-lucide="map-pin"></i>',
+                            className: 'from-marker text-primary-600',
+                            iconSize: [30, 30]
+                        })
+                    }).addTo(map);
+                }
+                map.setView(coords, 13);
+            } else if (inputId === 'to_location') {
+                if (toMarker) {
+                    toMarker.setLatLng(coords);
+                } else {
+                    toMarker = L.marker(coords, {
+                        icon: L.divIcon({
+                            html: '<i class="marker-icon" data-lucide="flag"></i>',
+                            className: 'to-marker text-red-600',
+                            iconSize: [30, 30]
+                        })
+                    }).addTo(map);
+                }
+            }
+            
+            // If both markers exist, show route between them
+            if (fromMarker && toMarker) {
+                highlightRoute(
+                    fromMarker.getLatLng().lat,
+                    fromMarker.getLatLng().lng,
+                    toMarker.getLatLng().lat,
+                    toMarker.getLatLng().lng
+                );
+            }
+        }
+        
+        // Debounce helper function
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        // Initialize autocomplete
+        setupLocationAutocomplete('from_location', 'from_latitude', 'from_longitude');
+        setupLocationAutocomplete('to_location', 'to_latitude', 'to_longitude');
+        
+        // Check for existing coordinates and set markers
+        const fromLat = document.getElementById('from_latitude').value;
+        const fromLng = document.getElementById('from_longitude').value;
+        const toLat = document.getElementById('to_latitude').value;
+        const toLng = document.getElementById('to_longitude').value;
+        
+        if (fromLat && fromLng) {
+            updateMapMarker('from_location', fromLat, fromLng);
+        }
+        
+        if (toLat && toLng) {
+            updateMapMarker('to_location', toLat, toLng);
+        }
+        
+        // Add some CSS for the custom markers
+        const style = document.createElement('style');
+        style.textContent = `
+            .bike-marker .bike-icon,
+            .from-marker .marker-icon,
+            .to-marker .marker-icon {
+                width: 24px;
+                height: 24px;
+                color: currentColor;
+            }
+            
+            .popup-book-btn {
+                display: inline-block;
+                margin-top: 8px;
+                padding: 4px 8px;
+                background-color: #2563EB;
+                color: white;
+                border-radius: 4px;
+                text-decoration: none;
+                font-size: 12px;
+            }
+            
+            .location-suggestions {
+                z-index: 1000;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Refresh Lucide icons when markers are added
+        setTimeout(() => {
+            lucide.createIcons();
+        }, 500);
+    });
+</script>
+{% endblock %}
