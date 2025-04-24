@@ -1,0 +1,238 @@
+{% extends 'driver_base.html' %}
+{% block title %}Driver Dashboard - MotoGo{% endblock %}
+{% block extra_head %}
+<style>
+    #map { height: 400px; width: 100%; border-radius: 0.75rem; }
+    .leaflet-routing-container {
+        max-height: 200px; overflow-y: auto; background-color: white; border-radius: 0.5rem; padding: 10px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .pickup-marker { color: #3b82f6; font-size: 24px; }
+    .destination-marker { color: #10b981; font-size: 24px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white shadow-sm z-10">
+        <div class="flex items-center justify-between px-4 md:px-8 py-4">
+            <div class="flex items-center">
+                <button class="p-2 mr-2 md:hidden text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 icon-button">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-gray-900">Driver Dashboard</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        <!-- Welcome Message -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Welcome back, {{ user.first_name|default:user.username }}</h1>
+            <p class="text-gray-600">Ready to accept new rides?</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow border-l-4 border-blue-500">
+                <div class="p-3 rounded-full bg-blue-100 mb-2">
+                    <i data-lucide="flag" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">View Rides</span>
+            </button>
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div class="p-3 rounded-full bg-green-100 mb-2">
+                    <i data-lucide="wallet" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Earnings</span>
+            </button>
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div class="p-3 rounded-full bg-purple-100 mb-2">
+                    <i data-lucide="map-pin" class="w-6 h-6 text-purple-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Update Location</span>
+            </button>
+            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+                <div class="p-3 rounded-full bg-amber-100 mb-2">
+                    <i data-lucide="settings" class="w-6 h-6 text-amber-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Settings</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Map Section -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="relative">
+                    <div id="map"></div>
+                    <div class="absolute bottom-4 right-4 flex space-x-2 z-50">
+                        <button id="update-location" class="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50">
+                            <i data-lucide="locate" class="w-5 h-5 text-blue-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Rides -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-lg font-semibold mb-4">Available Rides</h2>
+                <div class="space-y-4">
+                    {% for ride in available_rides %}
+                    <div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <h3 class="font-medium">{{ ride.pickup_location }} to {{ ride.dropoff_location }}</h3>
+                        <p class="text-sm text-gray-500">Distance: {{ ride.distance_km }} km • Fare: Ksh{{ ride.fare }}</p>
+                        <a href="{% url 'accept_ride_request' ride.id %}" class="mt-2 inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Accept Ride</a>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500">No available rides at the moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i data-lucide="bike" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Rides</p>
+                        <h3 class="text-xl font-bold">{{ total_rides|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i data-lucide="wallet" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Earnings</p>
+                        <h3 class="text-xl font-bold">Ksh{{ total_earnings|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-purple-100">
+                        <i data-lucide="star" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Average Rating</p>
+                        <h3 class="text-xl font-bold">{{ average_rating|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Trips -->
+        <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+            <div class="p-4 md:p-6 border-b flex items-center justify-between">
+                <h2 class="text-lg font-semibold">Recent Trips</h2>
+                <a href="{% url 'driver_rides' %}" class="text-blue-600 text-sm hover:text-blue-800 flex items-center">
+                    <span>View All</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </a>
+            </div>
+            <div class="divide-y">
+                {% for trip in recent_trips %}
+                <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-gray-100">
+                            <i data-lucide="bike" class="w-5 h-5 text-gray-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium">{{ trip.pickup_location }} to {{ trip.dropoff_location }}</h3>
+                            <p class="text-sm text-gray-500">{{ trip.created_at|date:"D, M d" }} • {{ trip.fare }} Ksh</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs {% if trip.status == 'completed' %}bg-green-100 text-green-800{% elif trip.status == 'canceled' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ trip.status }}
+                    </span>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center">
+                    <p class="text-gray-500">No recent trips.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+    
+    // Initialize map
+    const map = L.map('map').setView([-1.286389, 36.817223], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    let driverMarker = null;
+
+    // Update driver location
+    document.getElementById('update-location').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                // Update map view
+                map.setView([lat, lng], 15);
+                
+                // Update or create driver marker
+                if (driverMarker) {
+                    driverMarker.setLatLng([lat, lng]);
+                } else {
+                    driverMarker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div style="background-color:#FF0000;width:15px;height:15px;border-radius:50%;"></div>`,
+                            iconSize: [15, 15]
+                        })
+                    }).addTo(map);
+                }
+
+                // Send location to server
+                fetch("{% url 'update_driver_location' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        driver_id: {{ user.profile.id }},
+                        latitude: lat,
+                        longitude: lng
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('Location updated successfully');
+                    }
+                })
+                .catch(error => console.error('Error updating location:', error));
+            }, function(error) {
+                console.error("Error getting location:", error);
+                alert("Could not get your location. Please ensure location services are enabled.");
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    });
+});
+</script>
+<div class="mb-6">
+    <button id="toggle-availability" class="px-4 py-2 bg-{% if profile.motorcycle.availability %}green-600{% else %}red-600{% endif %} text-white rounded-lg">
+        {{ profile.motorcycle.availability|yesno:"Online,Offline" }}
+    </button>
+</div>
+
+
+{% endblock %}

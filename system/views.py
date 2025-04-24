@@ -18,6 +18,9 @@ from django.db import models
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Profile
+from django.db.models import Sum, Count, Avg, Max, Min
+
+
 
 def home(request):
     return render(request, 'landingpage.html')
@@ -162,6 +165,8 @@ def add_rating(request, ride_id):
 
     return render(request, 'client/add_rating.html', {'ride_request': ride_request})
 
+
+
 # User Dashboard
 @login_required
 def dashboard(request):
@@ -206,7 +211,7 @@ def dashboard(request):
         # Create a profile for the user if one doesn't exist
         profile = Profile.objects.create(
             user=request.user,
-            phone="Please update",  # Placeholder
+            phone=f"temp-{request.user.id}",  # Use a unique phone placeholder
             user_type='client'  # Default to client
         )
         messages.success(request, "Your profile has been created. Please update your phone number.")
@@ -380,3 +385,116 @@ def add_payment_method(request):
 
     return redirect('payments')  # Redirect back if not POST
 
+def driver_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            if user.profile.user_type == 'driver':
+                login(request, user)
+                messages.success(request, 'Logged in successfully!')
+                return redirect('driver_dashboard')
+            else:
+                messages.error(request, 'This account is not a driver account.')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'driver/login.html', {'form': form})
+
+def driver_signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            phone = request.POST.get('phone', '').strip()
+            plate_number = request.POST.get('plate_number', '').strip()
+            if phone and plate_number:
+                profile = Profile.objects.create(
+                    user=user,
+                    phone=phone,
+                    user_type='driver'
+                )
+                Motorcycle.objects.create(
+                    driver=profile,
+                    plate_number=plate_number,
+                    availability=True
+                )
+                login(request, user)
+                messages.success(request, 'Driver account created successfully!')
+                return redirect('driver_dashboard')
+            else:
+                messages.error(request, 'Phone number and plate number are required.')
+    else:
+        form = UserCreationForm()
+    return render(request, 'driver/signup.html', {'form': form})
+
+@login_required
+def driver_dashboard(request):
+    profile = request.user.profile
+    if profile.user_type != 'driver':
+        messages.error(request, 'Access denied. Driver account required.')
+        return redirect('home')
+
+    # Get available rides
+    available_rides = RideRequest.objects.filter(status='pending', driver__isnull=True)
+
+    # Get recent trips
+    recent_trips = RideRequest.objects.filter(driver=profile).order_by('-created_at')[:5]
+
+    # Calculate stats
+    total_rides = RideRequest.objects.filter(driver=profile, status='completed').count()
+    total_earnings = Payment.objects.filter(ride__driver=profile).aggregate(total=Sum('amount'))['total'] or 0
+    average_rating = Rating.objects.filter(driver=profile).aggregate(avg=Avg('rating'))['avg'] or 0
+
+    context = {
+        'available_rides': available_rides,
+        'recent_trips': recent_trips,
+        'total_rides': total_rides,
+        'total_earnings': total_earnings,
+        'average_rating': round(average_rating, 1),
+        'profile': profile,
+    }
+    return render(request, 'driver/driver_dashboard.html', context)
+
+@login_required
+def driver_rides(request):
+    profile = request.user.profile
+    if profile.user_type != 'driver':
+        messages.error(request, 'Access denied. Driver account required.')
+        return redirect('home')
+
+    rides = RideRequest.objects.filter(driver=profile) | RideRequest.objects.filter(status='pending', driver__isnull=True)
+    context = {
+        'rides': rides.order_by('-created_at'),
+    }
+    return render(request, 'driver/rides.html', context)
+
+@login_required
+def driver_payments(request):
+    profile = request.user.profile
+    if profile.user_type != 'driver':
+        messages.error(request, 'Access denied. Driver account required.')
+        return redirect('home')
+
+    payments = Payment.objects.filter(ride__driver=profile).order_by('-timestamp')
+    total_earnings = payments.aggregate(total=Sum('amount'))['total'] or 0
+    pending_payments = payments.filter(ride__status='ongoing').aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'payments': payments,
+        'total_earnings': total_earnings,
+        'pending_payments': pending_payments,
+    }
+    return render(request, 'driver/payments.html', context)
+
+@login_required
+@csrf_exempt
+def toggle_availability(request):
+    if request.method == 'POST':
+        profile = request.user.profile
+        if profile.user_type != 'driver':
+            return JsonResponse({'error': 'Access denied'}, status=403)
+        motorcycle = Motorcycle.objects.get(driver=profile)
+        motorcycle.availability = not motorcycle.availability
+        motorcycle.save()
+        return JsonResponse({'status': 'success', 'availability': motorcycle.availability})
+    return JsonResponse({'error': 'Invalid request'}, status=400)

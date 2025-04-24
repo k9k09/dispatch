@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'client_base.html' %}
 
 {% block extra_head %}
 <style>
@@ -101,18 +101,28 @@
 
         <!-- Quick Actions -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow border-l-4 border-blue-500">
-                <div class="p-3 rounded-full bg-blue-100 mb-2 flex items-center justify-center">
-                    <i data-lucide="flag" class="w-6 h-6 text-blue-600"></i>
-                </div>
-                <span class="font-medium text-gray-800">Request Ride</span>
-            </button>
-            <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
-                <div class="p-3 rounded-full bg-purple-100 mb-2 flex items-center justify-center">
-                    <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
-                </div>
-                <span class="font-medium text-gray-800">Schedule</span>
-            </button>
+            <button 
+            onclick="window.location.href='{% url 'find_rides' %}'; return false;" 
+            class="bg-white border-l-4 border-blue-500 rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow w-full space-y-2 {% if request.resolver_match.url_name == 'find_rides' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+            
+            <div class="p-3 rounded-full bg-blue-100 flex items-center justify-center">
+                <i data-lucide="map" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            
+            <span class="font-medium text-sm md:text-base sidebar-text">Find Rides</span>
+        </button>
+        
+            <button 
+            onclick="window.location.href='{% url 'my_trips' %}'; return false;" 
+            class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow w-full space-y-2 {% if request.resolver_match.url_name == 'bookings' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+            
+            <div class="p-3 rounded-full bg-purple-100 flex items-center justify-center">
+                <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            
+            <span class="font-medium text-sm md:text-base sidebar-text">Schedule</span>
+        </button>        
+
             <button class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
                 <div class="p-3 rounded-full bg-green-100 mb-2 flex items-center justify-center">
                     <i data-lucide="users" class="w-6 h-6 text-green-600"></i>

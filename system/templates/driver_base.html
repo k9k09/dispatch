@@ -1,33 +1,15 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MotoGo{% endblock %}</title>
-
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-    crossorigin="" />
-
-    <!-- Leaflet JavaScript -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-      crossorigin=""></script>
-
-    <!-- Leaflet Routing Machine for directions -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-    
-    <!-- Tailwind CSS -->
+    <title>{% block title %}MotoGo - Driver{% endblock %}</title>
+    <!-- Tailwind CSS Standalone -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -50,22 +32,18 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
-                    boxShadow: {
-                        'inner-right': 'inset -2px 0 4px 0 rgba(0, 0, 0, 0.05)',
-                    }
                 },
             },
         }
     </script>
     <style>
+        /* Same styles as client/base.html for consistency */
         .sidebar-transition {
             transition: all 0.3s ease;
         }
-        
         .nav-item.active {
             position: relative;
         }
-        
         .nav-item.active::after {
             content: '';
             position: absolute;
@@ -76,27 +54,20 @@
             background-color: #4d9dff;
             border-radius: 2px 0 0 2px;
         }
-        
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
-        
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
-        
         ::-webkit-scrollbar-thumb {
             background: #94a3b8;
             border-radius: 3px;
         }
-        
         ::-webkit-scrollbar-thumb:hover {
             background: #64748b;
         }
-
-        /* Mobile menu animation */
         .mobile-menu-enter {
             transform: translateX(-100%);
             opacity: 0;
@@ -115,8 +86,6 @@
             opacity: 0;
             transition: all 0.3s ease;
         }
-
-        /* Fix for iOS Safari bottom bar */
         @supports (-webkit-touch-callout: none) {
             .h-screen {
                 height: -webkit-fill-available;
@@ -127,50 +96,33 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar - Fixed on desktop, off-canvas on mobile -->
+        <!-- Sidebar -->
         <div id="sidebar" class="sidebar-transition fixed lg:static w-64 lg:w-64 bg-primary-950 text-white shadow-xl flex flex-col z-30 transform -translate-x-full lg:translate-x-0">
-            <!-- Logo area -->
             <div class="p-4 md:p-6 border-b border-primary-900/50 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <i data-lucide="bike" class="w-7 h-7 md:w-8 md:h-8 text-primary-300"></i>
-                    <span class="sidebar-text text-lg md:text-xl font-bold tracking-tight">MotoGo</span>
+                    <span class="sidebar-text text-lg md:text-xl font-bold tracking-tight">MotoGo Driver</span>
                 </div>
                 <button id="mobile-sidebar-close" class="lg:hidden p-1 rounded-full hover:bg-primary-900">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
-            <!-- Navigation -->
             <nav class="mt-4 md:mt-6 flex-1 px-2">
                 <div class="space-y-1">
-                    <button onclick="window.location.href='{% url 'dashboard' %}'; return false;" data-tab="dashboard" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'dashboard' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+                    <button onclick="window.location.href='{% url 'driver_dashboard' %}';" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'driver_dashboard' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
                         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                         <span class="sidebar-text text-sm md:text-base font-medium">Dashboard</span>
                     </button>
-                    
-                    <button onclick="window.location.href='{% url 'my_trips' %}';return false;" data-tab="bookings" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'bookings' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
-                        <i data-lucide="calendar" class="w-5 h-5"></i>
-                        <span class="sidebar-text text-sm md:text-base font-medium">My Trips</span>
-                    </button>
-                    
-                    <button onclick="window.location.href='{% url 'find_rides' %}'; return false;" data-tab="find" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'find_rides' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+                    <button onclick="window.location.href='{% url 'driver_rides' %}';" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'driver_rides' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
                         <i data-lucide="map" class="w-5 h-5"></i>
-                        <span class="sidebar-text text-sm md:text-base font-medium">Find Rides</span>
+                        <span class="sidebar-text text-sm md:text-base font-medium">Ride Requests</span>
                     </button>
-                    
-                    <button onclick="window.location.href='{% url 'payments' %}'; return false;" data-tab="payments" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'payments' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
+                    <button onclick="window.location.href='{% url 'payments' %}';" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'payments' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
                         <i data-lucide="credit-card" class="w-5 h-5"></i>
-                        <span class="sidebar-text text-sm md:text-base font-medium">Payments</span>
-                    </button>
-                    
-                    <button onclick="window.location.href='#'" data-tab="settings" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg transition-all {% if request.resolver_match.url_name == 'settings' %}bg-primary-800 text-white{% else %}text-primary-100 hover:bg-primary-900 hover:text-white{% endif %}">
-                        <i data-lucide="settings" class="w-5 h-5"></i>
-                        <span class="sidebar-text text-sm md:text-base font-medium">Settings</span>
+                        <span class="sidebar-text text-sm md:text-base font-medium">Earnings</span>
                     </button>
                 </div>
             </nav>
-            
-            <!-- Bottom section with logout -->
             <div class="px-2 pb-4 pt-2">
                 <div class="border-t border-primary-900/50 my-2"></div>
                 <a href="{% url 'logout' %}" class="nav-item w-full flex items-center space-x-3 px-4 py-2.5 md:py-3 rounded-lg text-red-300 hover:bg-red-900/30 hover:text-red-300 transition-all">
@@ -179,31 +131,23 @@
                 </a>
             </div>
         </div>
-        
-        <!-- Main Content Area -->
+        <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Top Navigation Bar -->
             <header class="bg-white shadow-sm z-10">
                 <div class="flex items-center justify-between px-3 sm:px-4 py-3 sm:py-4">
                     <div class="flex items-center">
-                        <!-- Toggle Sidebar Button -->
                         <button id="sidebarToggle" class="p-1.5 sm:p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none">
                             <i data-lucide="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                         </button>
-                        <h1 class="ml-3 sm:ml-4 text-lg sm:text-xl font-semibold text-gray-900 truncate">{% block page_title %}Dashboard{% endblock %}</h1>
+                        <h1 class="ml-3 sm:ml-4 text-lg sm:text-xl font-semibold text-gray-900 truncate">{% block page_title %}Driver Dashboard{% endblock %}</h1>
                     </div>
-                    
-                    <!-- Right side with notifications and user profile -->
                     <div class="flex items-center space-x-2 sm:space-x-4">
-                        <!-- Notifications -->
                         <div class="relative">
                             <button class="p-1.5 sm:p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
                             </button>
                             <span class="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full"></span>
                         </div>
-                        
-                        <!-- User Profile Dropdown -->
                         <div class="relative group">
                             <button class="flex items-center space-x-2 sm:space-x-3 p-1.5 rounded-lg hover:bg-gray-100">
                                 <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-md">
@@ -212,8 +156,6 @@
                                 <span class="hidden md:block text-sm font-medium text-gray-800">Profile</span>
                                 <i data-lucide="chevron-down" class="hidden md:block w-4 h-4 text-gray-500"></i>
                             </button>
-                            
-                            <!-- Dropdown menu - Improved for touch -->
                             <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden group-hover:block md:group-hover:block z-50">
                                 <a href="{% url 'client_profile' %}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
                                 <div class="border-t border-gray-200 my-1"></div>
@@ -223,11 +165,7 @@
                     </div>
                 </div>
             </header>
-            
-            <!-- Mobile sidebar background overlay -->
             <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden"></div>
-            
-            <!-- Page Content -->
             <main class="flex-1 overflow-auto bg-gray-50 p-3 sm:p-4 md:p-6">
                 <div class="max-w-7xl mx-auto">
                     {% block content %}
@@ -236,88 +174,44 @@
             </main>
         </div>
     </div>
-
-    <!-- Scripts -->
     <script>
-        // Initialize icons
         lucide.createIcons();
-        
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar toggle functionality
             const sidebarToggle = document.getElementById('sidebarToggle');
             const mobileSidebarClose = document.getElementById('mobile-sidebar-close');
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
             const sidebarTexts = document.querySelectorAll('.sidebar-text');
             
-            // Check localStorage for saved preference (desktop only)
-            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            
-            // Function to check if we're on mobile
             function isMobile() {
-                return window.innerWidth < 1024; // lg breakpoint in Tailwind
+                return window.innerWidth < 1024;
             }
             
-            // Set initial state for desktop
-            if (sidebarCollapsed && !isMobile()) {
-                sidebar.classList.remove('w-64');
-                sidebar.classList.add('w-16');
-                sidebarTexts.forEach(el => el.classList.add('hidden'));
-            }
-            
-            // Toggle function that's aware of screen size
             function toggleSidebar() {
                 if (isMobile()) {
-                    // Mobile behavior: show/hide the entire sidebar
                     sidebar.classList.toggle('-translate-x-full');
                     sidebarOverlay.classList.toggle('hidden');
                     document.body.classList.toggle('overflow-hidden');
-                } else {
-                    // Desktop behavior: expand/collapse
-                    const isCollapsed = sidebar.classList.contains('w-16');
-                    
-                    if (isCollapsed) {
-                        // Expand sidebar
-                        sidebar.classList.remove('w-16');
-                        sidebar.classList.add('w-64');
-                        setTimeout(() => {
-                            sidebarTexts.forEach(el => el.classList.remove('hidden'));
-                        }, 150);
-                        localStorage.setItem('sidebarCollapsed', 'false');
-                    } else {
-                        // Collapse sidebar
-                        sidebarTexts.forEach(el => el.classList.add('hidden'));
-                        sidebar.classList.remove('w-64');
-                        sidebar.classList.add('w-16');
-                        localStorage.setItem('sidebarCollapsed', 'true');
-                    }
                 }
             }
             
-            // Add click event listeners
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', toggleSidebar);
             }
-            
             if (mobileSidebarClose) {
                 mobileSidebarClose.addEventListener('click', toggleSidebar);
             }
-            
             if (sidebarOverlay) {
                 sidebarOverlay.addEventListener('click', toggleSidebar);
             }
             
-            // Handle dropdown on touch devices
             const profileButton = document.querySelector('.group button');
             const profileDropdown = document.querySelector('.group div');
-            
             if (profileButton && profileDropdown && isMobile()) {
                 profileButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     profileDropdown.classList.toggle('hidden');
                 });
-                
-                // Close dropdown when clicking outside
                 document.addEventListener('click', function(e) {
                     if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
                         profileDropdown.classList.add('hidden');
@@ -325,31 +219,19 @@
                 });
             }
             
-            // Handle window resize
             window.addEventListener('resize', function() {
                 if (!isMobile()) {
-                    // Reset mobile-specific states when returning to desktop
                     sidebar.classList.remove('-translate-x-full');
                     sidebarOverlay.classList.add('hidden');
                     document.body.classList.remove('overflow-hidden');
-                    
-                    // Apply saved desktop preference
-                    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                        sidebar.classList.remove('w-64');
-                        sidebar.classList.add('w-16');
-                        sidebarTexts.forEach(el => el.classList.add('hidden'));
-                    }
                 }
             });
             
-            // Handle tab navigation
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
                     navItems.forEach(ni => ni.classList.remove('active', 'bg-primary-800'));
                     this.classList.add('active', 'bg-primary-800');
-                    
-                    // Close sidebar on mobile after navigation
                     if (isMobile()) {
                         sidebar.classList.add('-translate-x-full');
                         sidebarOverlay.classList.add('hidden');
@@ -358,17 +240,14 @@
                 });
             });
             
-            // Fix 100vh issue on iOS Safari
             function setHeight() {
                 const vh = window.innerHeight * 0.01;
                 document.documentElement.style.setProperty('--vh', `${vh}px`);
             }
-            
             setHeight();
             window.addEventListener('resize', setHeight);
         });
     </script>
-    
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

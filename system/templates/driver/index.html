@@ -1,0 +1,109 @@
+{% extends 'driver_base.html' %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Welcome Message -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Welcome back, {{ profile.user.first_name|default:profile.user.username }}</h1>
+        <p class="text-gray-600">Here's your driver dashboard.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow overflow-hidden relative">
+            <div class="flex items-center space-x-3">
+                <div class="p-3 rounded-full bg-blue-100 flex items-center justify-center">
+                    <i data-lucide="bike" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Rides</p>
+                    <h3 class="text-xl font-bold">{{ total_rides }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow overflow-hidden relative">
+            <div class="flex items-center space-x-3">
+                <div class="p-3 rounded-full bg-green-100 flex items-center justify-center">
+                    <i data-lucide="wallet" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Earnings</p>
+                    <h3 class="text-xl font-bold">Ksh {{ total_earnings }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow overflow-hidden relative">
+            <div class="flex items-center space-x-3">
+                <div class="p-3 rounded-full bg-purple-100 flex items-center justify-center">
+                    <i data-lucide="map-pin" class="w-6 h-6 text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Availability</p>
+                    <h3 class="text-xl font-bold">{{ motorcycle.availability|yesno:"Available,Not Available" }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Ride Requests -->
+    <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+        <div class="p-4 md:p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Pending Ride Requests</h2>
+            <a href="{% url 'driver_rides' %}" class="text-blue-600 text-sm hover:text-blue-800 flex items-center">
+                <span>View All</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+            </a>
+        </div>
+        <div class="divide-y">
+            {% for ride in pending_rides %}
+            <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-gray-100 flex items-center justify-center">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-gray-700"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">{{ ride.pickup_location }} to {{ ride.dropoff_location }}</h3>
+                        <p class="text-sm text-gray-500">Client: {{ ride.client.user.username }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{% url 'accept_ride_request' ride.id %}" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Accept</a>
+                    <a href="{% url 'decline_ride_request' ride.id %}" class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">Decline</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center">
+                <p class="text-gray-500">No pending ride requests.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Ongoing Rides -->
+    <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+        <div class="p-4 md:p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Ongoing Rides</h2>
+        </div>
+        <div class="divide-y">
+            {% for ride in ongoing_rides %}
+            <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-gray-100 flex items-center justify-center">
+                        <i data-lucide="bike" class="w-5 h-5 text-gray-700"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">{{ ride.pickup_location }} to {{ ride.dropoff_location }}</h3>
+                        <p class="text-sm text-gray-500">Client: {{ ride.client.user.username }}</p>
+                    </div>
+                </div>
+                <a href="{% url 'complete_ride' ride.id %}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">Complete Ride</a>
+            </div>
+            {% empty %}
+            <div class="p-6 text-center">
+                <p class="text-gray-500">No ongoing rides.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

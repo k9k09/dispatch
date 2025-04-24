@@ -1,0 +1,70 @@
+{% extends 'driver_base.html' %}
+{% block title %}Driver Payment - MotoGo{% endblock %}
+{% block content %}
+<div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white shadow-sm z-10">
+        <div class="flex items-center justify-between px-4 md:px-8 py-4">
+            <h1 class="text-xl font-semibold text-gray-900">Your Earnings</h1>
+        </div>
+    </header>
+
+    <!-- Payments Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i data-lucide="wallet" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Earnings</p>
+                        <h3 class="text-xl font-bold">Ksh{{ total_earnings|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i data-lucide="clock" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Pending Payments</p>
+                        <h3 class="text-xl font-bold">Ksh{{ pending_payment|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+            <div class="p-4 md:p-6 border-b">
+                <h2 class="text-lg font-semibold">Payment History</h2>
+            </div>
+            <div class="divide-y">
+                {% for payment in payments %}
+                <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-gray-100">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-gray-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium">Ride #{{ payment.ride.id }}</h3>
+                            <p class="text-sm text-gray-500">{{ payment.timestamp|date:"D, M d" }} • {{ payment.method }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="font-bold">Ksh{{ payment.amount }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center">
+                    <p class="text-gray-500">No payment yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

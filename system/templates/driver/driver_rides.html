@@ -1,0 +1,53 @@
+{% extends 'driver_base.html' %}
+{% block title %}Driver Rides - MotoGo{% endblock %}
+{% block content %}
+<div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white shadow-sm z-10">
+        <div class="flex items-center justify-between px-4 md:px-8 py-4">
+            <h1 class="text-xl font-semibold text-gray-900">Your Rides</h1>
+        </div>
+    </header>
+
+    <!-- Rides Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+            <div class="p-4 md:p-6 border-b">
+                <h2 class="text-lg font-semibold">Active and Recent Rides</h2>
+            </div>
+            <div class="divide-y">
+                {% for ride in rides %}
+                <div class="p-4 md:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded
+
+-full bg-gray-100">
+                            <i data-lucide="bike" class="w-5 h-5 text-gray-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium">{{ ride.pickup_location }} to {{ ride.dropoff_location }}</h3>
+                            <p class="text-sm text-gray-500">{{ ride.created_at|date:"D, M d" }} • Ksh{{ ride.fare }}</p>
+                            <p class="text-sm text-gray-500">Client: {{ ride.client.user.username }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end space-y-2">
+                        <span class="px-3 py-1 rounded-full text-xs {% if ride.status == 'completed' %}bg-green-100 text-green-800{% elif ride.status == 'canceled' %}bg-red-100 text-red-800{% elif ride.status == 'pending' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ ride.status }}
+                        </span>
+                        {% if ride.status == 'pending' %}
+                        <a href="{% url 'accept_ride_request' ride.id %}" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Accept</a>
+                        {% elif ride.status == 'accepted' or ride.status == 'ongoing' %}
+                        <a href="{% url 'complete_ride' ride.id %}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">Complete</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-6 text-center">
+                    <p class="text-gray-500">No rides available.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
